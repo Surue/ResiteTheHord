@@ -10,24 +10,40 @@ public class PlayerController : NetworkBehaviour {
     public GameObject bulletPrefab;
     public Transform bulletSpawn;
 
+    //Movement
+    Rigidbody body;
+    Vector3 movement;
+
 	// Use this for initialization
 	void Start () {
-		
+        if(isLocalPlayer)
+	    FindObjectOfType<cameraController>().focusedObject = gameObject;
+
+	    body = GetComponent<Rigidbody>();
 	}
-	
-	// Update is called once per frame
+
+    void FixedUpdate() {
+        if (!isLocalPlayer) {
+            return;
+        }
+
+        movement = new Vector3(movement.x * 3, body.velocity.y, movement.z * 3);
+
+        body.velocity = movement;
+    }
+
+    // Update is called once per frame
 	void Update () {
 	    if (!isLocalPlayer) {
 	        return;
 	    }
 
-	    float x = Input.GetAxis("Horizontal") * Time.deltaTime * 150.0f;
-	    float z = Input.GetAxis("Vertical") * Time.deltaTime * 3.0f;
+	    float x = Input.GetAxis("Horizontal");
+	    float z = Input.GetAxis("Vertical");
+        
+        movement = new Vector3(x, 0, z);
 
-        transform.Rotate(0, x, 0);
-        transform.Translate(0, 0, z);
-
-	    if (Input.GetKeyDown(KeyCode.Space)) {
+	    if (Input.GetButton("Fire1")) {
 	        CmdFire();
 	    }
 	}
