@@ -10,18 +10,14 @@ public class CustomNetworkManager:NetworkManager {
 
     public NetworkDiscovery discovery;
 
-    bool isLan = false;
-
     public void StartHosting() {
         StartMatchMaker();
         matchMaker.CreateMatch("Nico", 4, true, "", "", "", 0, 0, OnMatchCreated);
     }
 
     public override void OnStartHost() {
-        if (isLan) {
-            discovery.Initialize();
-            discovery.StartAsServer();
-        }
+        discovery.Initialize();
+        discovery.StartAsServer();
     }
 
     public override void OnStartClient(NetworkClient client) {
@@ -35,7 +31,6 @@ public class CustomNetworkManager:NetworkManager {
 
     public void StartLan() {
         base.StartHost();
-        isLan = true;
     }
 
     public void JoinLan() {
@@ -63,6 +58,7 @@ public class CustomNetworkManager:NetworkManager {
     }
 
     void HandleListMatchesComplete(bool success, string extendedinfo, List<MatchInfoSnapshot> responsedata) {
+        if(!IsClientConnected())
         AvailableMatchesList.HandleNewMatchList(responsedata);
     }
 

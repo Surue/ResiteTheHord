@@ -3,7 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Bullet : MonoBehaviour {
-    void OnCollisionEnter(Collision other) {
+    void OnCollisionEnter2D(Collision2D other) {
+        if (other.gameObject.CompareTag("Player")) {
+            return;
+        }
+        
         GameObject hit = other.gameObject;
         Health health = hit.GetComponent<Health>();
 

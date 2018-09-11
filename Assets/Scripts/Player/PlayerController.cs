@@ -7,19 +7,25 @@ using UnityEngine.Networking;
 public class PlayerController : NetworkBehaviour {
 
     //Weapon
+    [Header("Weapon")]
     public GameObject bulletPrefab;
     public Transform bulletSpawn;
+    [SerializeField] float timeBetweenFire = 0.1f;
+    float timeSinceLastFire = 0;
+    [SerializeField] float bulletSpeed = 10;
 
     //Movement
-    Rigidbody body;
+    [Header("Movement")]
+    Rigidbody2D body;
     Vector3 movement;
+    [SerializeField] float speed = 4f;
 
 	// Use this for initialization
 	void Start () {
         if(isLocalPlayer)
 	    FindObjectOfType<cameraController>().focusedObject = gameObject;
 
-	    body = GetComponent<Rigidbody>();
+	    body = GetComponent<Rigidbody2D>();
 	}
 
     void FixedUpdate() {
@@ -27,7 +33,7 @@ public class PlayerController : NetworkBehaviour {
             return;
         }
 
-        movement = new Vector3(movement.x * 3, body.velocity.y, movement.z * 3);
+        movement = new Vector3(movement.x * speed, movement.y * speed);
 
         body.velocity = movement;
     }
@@ -38,21 +44,31 @@ public class PlayerController : NetworkBehaviour {
 	        return;
 	    }
 
+        //Movement
 	    float x = Input.GetAxis("Horizontal");
-	    float z = Input.GetAxis("Vertical");
+	    float y = Input.GetAxis("Vertical");
         
-        movement = new Vector3(x, 0, z);
+        movement = new Vector3(x, y);
 
-	    if (Input.GetButton("Fire1")) {
+        //Rotation
+        Vector2 direction = (Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position ).normalized;
+	    transform.up = direction;
+
+        if (Input.GetButton("Fire1") && timeSinceLastFire <= 0) {
+            timeSinceLastFire = timeBetweenFire;
 	        CmdFire();
 	    }
+
+	    timeSinceLastFire -= Time.deltaTime;
 	}
 
     [Command]
     void CmdFire() {
         GameObject bullet = Instantiate(bulletPrefab, bulletSpawn.position, bulletSpawn.rotation);
 
-        bullet.GetComponent<Rigidbody>().velocity = bullet.transform.forward * 6;
+        bullet.transform.position += Random.Range(-0.1f, 0.1f) * bulletSpawn.right;
+
+        bullet.GetComponentInChildren<Rigidbody2D>().velocity = bullet.transform.up * bulletSpeed;
 
         NetworkServer.Spawn(bullet);
 
@@ -60,6 +76,6 @@ public class PlayerController : NetworkBehaviour {
     }
 
     public override void OnStartLocalPlayer() {
-        GetComponent<MeshRenderer>().material.color = Color.blue;
+        GetComponentInChildren<SpriteRenderer>().color = Color.blue;
     }
 }
