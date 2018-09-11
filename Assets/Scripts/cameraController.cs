@@ -15,14 +15,17 @@ public class cameraController : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 	    if (focusedObject) {
-	        Vector2 newAimPoint = focusedObject.transform.up * 3;
+	        Vector2 newAimPoint = transform.position;
 
-	        Vector2 lerpedAimPoint = Vector3.Lerp(aimPoint, newAimPoint, Time.deltaTime * 6.5f);
+	        Vector2 lerpedAimPoint = Vector2.Lerp(transform.position, focusedObject.transform.up * 3 + focusedObject.transform.position, Time.deltaTime * 6.5f);
+            Debug.Log(transform.position);
+            Debug.Log(focusedObject.transform.up * 3 + focusedObject.transform.position);
+            Debug.Log("================");
 
-	        transform.position = (Vector2) focusedObject.transform.position + lerpedAimPoint;
+	        transform.position = lerpedAimPoint;
 	        transform.position = new Vector3(transform.position.x, transform.position.y, -10);
 
-	        aimPoint = lerpedAimPoint;
-	    }
+	        aimPoint = focusedObject.transform.up * 3;
+        }
 	}
 }
