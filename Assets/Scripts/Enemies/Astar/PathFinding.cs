@@ -94,7 +94,6 @@ public class PathFinding:MonoBehaviour {
 
     void BuildShortestPath(List<Vector2Int> path, NavigationAI.Node node) {
         if(node.parent == null) {
-            path.Add(node.positionInt);
             return;
         }
 
@@ -104,7 +103,6 @@ public class PathFinding:MonoBehaviour {
 
     void BuildShortestPath(List<Vector2> path, NavigationAI.Node node) {
         if(node.parent == null) {
-            path.Add(node.position);
             return;
         }
 

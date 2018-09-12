@@ -10,7 +10,7 @@ public class PlayerController : NetworkBehaviour {
     [Header("Weapon")]
     public GameObject bulletPrefab;
     public Transform bulletSpawn;
-    [SerializeField] float timeBetweenFire = 0.1f;
+    [SerializeField] float timeBetweenFire = 0.2f;
     float timeSinceLastFire = 0;
     [SerializeField] float bulletSpeed = 10;
 
