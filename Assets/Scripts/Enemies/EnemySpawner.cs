@@ -7,6 +7,18 @@ public class EnemySpawner : NetworkBehaviour {
 
     public GameObject enemyPrefab;
     public int numberOfEnemies;
+    public int numberOfEnemiesToSpawn;
+
+    static float TIME_BETWEEEN_SPAWN = 0.5f;
+    float timeSinceLastSpawn = 0;
+
+    public void AddEnemiesToSpawn(int nb) {
+        numberOfEnemiesToSpawn += nb;
+
+        if (numberOfEnemiesToSpawn == 0) {
+            GameManager.Instance.FinishedSpawn();
+        }
+    }
 
     public override void OnStartServer() {
         //for (int i = 0; i < numberOfEnemies; i++) {
@@ -19,12 +31,26 @@ public class EnemySpawner : NetworkBehaviour {
 
     void Update() {
         if (Input.GetKeyDown(KeyCode.F)) {
-            CmdSpawn();
+            Spawn();
+        }
+
+        if (numberOfEnemiesToSpawn > 0) {
+            if (timeSinceLastSpawn <= 0) {
+                Spawn();
+                timeSinceLastSpawn = TIME_BETWEEEN_SPAWN;
+
+                numberOfEnemiesToSpawn -= 1;
+                if(numberOfEnemiesToSpawn <= 0) {
+                    GameManager.Instance.FinishedSpawn();
+                    timeSinceLastSpawn = 0;
+                }
+            } else {
+                timeSinceLastSpawn -= Time.deltaTime;
+            }
         }
     }
-
-    [Command]
-    void CmdSpawn() {
+    
+    void Spawn() {
         Vector3 spawnPosition = new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f)) + transform.position;
 
         GameObject enemy = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);

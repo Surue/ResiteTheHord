@@ -58,6 +58,18 @@ public class EnemyController : NetworkBehaviour {
 
     // Update is called once per frame
     void Update() {
+        switch (state) {
+            case State.INITIALIZE:
+            case State.IDLE:
+            case State.MOVE:
+                GetComponent<SpriteRenderer>().color = Color.magenta;
+                break;
+
+            case State.ATTACK:
+                GetComponent<SpriteRenderer>().color = Color.red;
+                break;
+        }
+
         if(!isServer) {
             return;
         }
@@ -67,8 +79,6 @@ public class EnemyController : NetworkBehaviour {
                 break;
 
             case State.IDLE:
-                GetComponent<SpriteRenderer>().color = Color.magenta;
-
                 if(path.Count == 0 || path == null) {
                     path = pathFinder.GetPathFromTo(transform, player.transform);
                     state = State.MOVE;
@@ -76,7 +86,6 @@ public class EnemyController : NetworkBehaviour {
                 break;
 
             case State.MOVE:
-                GetComponent<SpriteRenderer>().color = Color.magenta;
                 if(path == null || path.Count == 0) {
                     state = State.IDLE;
                 }
@@ -102,8 +111,6 @@ public class EnemyController : NetworkBehaviour {
 
             case State.ATTACK:
                 body.velocity = Vector2.zero;
-
-                GetComponent<SpriteRenderer>().color = Color.red;
                 foreach(GameObject target in targets) {
                     if(target.GetComponent<Health>()) {
                         target.GetComponent<Health>().TakeDamage(1);
