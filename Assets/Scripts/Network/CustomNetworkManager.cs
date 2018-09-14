@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Networking.Match;
@@ -8,7 +9,7 @@ public class CustomNetworkManager:NetworkManager {
 
     float nextRefreshTime = 0;
 
-    public NetworkDiscovery discovery;
+    public CustomNetworkDiscovery discovery;
 
     public void StartHosting() {
         StartMatchMaker();
@@ -16,25 +17,29 @@ public class CustomNetworkManager:NetworkManager {
     }
 
     public override void OnStartHost() {
-        discovery.Initialize();
-        discovery.StartAsServer();
+        //discovery.Initialize();
     }
 
     public override void OnStartClient(NetworkClient client) {
-        discovery.showGUI = false;
+        //discovery.showGUI = false;
     }
 
     public override void OnStopClient() {
-        discovery.StopBroadcast();
-        discovery.showGUI = true;
+        //discovery.StopBroadcast();
+        //discovery.showGUI = true;
     }
 
     public void StartLan() {
         base.StartHost();
+        discovery.StartBroadcast();
     }
 
     public void JoinLan() {
         base.StartClient();
+    }
+
+    public void SetNetworkAddress(string a) {
+        networkAddress = a;
     }
 
     void OnMatchCreated(bool success, string extendedinfo, MatchInfo responsedata) {
@@ -42,7 +47,7 @@ public class CustomNetworkManager:NetworkManager {
     }
 
     void Update() {
-        if (Time.time >= nextRefreshTime && IsClientConnected()) {
+        if (Time.time >= nextRefreshTime && !IsClientConnected()) {
             RefreshMatches();
         }
     }
@@ -54,6 +59,7 @@ public class CustomNetworkManager:NetworkManager {
             StartMatchMaker();
         }
 
+        Debug.Log("Refresh");
         matchMaker.ListMatches(0, 10, "", true, 0, 0, HandleListMatchesComplete);
     }
 

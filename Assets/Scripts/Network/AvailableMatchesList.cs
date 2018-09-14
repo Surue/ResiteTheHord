@@ -11,6 +11,7 @@ public class AvailableMatchesList:MonoBehaviour {
     static List<MatchInfoSnapshot> matches = new List<MatchInfoSnapshot>();
 
     public static void HandleNewMatchList(List<MatchInfoSnapshot> matchList) {
+        Debug.Log(matchList.Count);
         OnAvailableMatchesChanged(matchList);
     }
 }
