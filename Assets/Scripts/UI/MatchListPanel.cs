@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking.Match;
 
+//TO REMOVE
+
 public class MatchListPanel:MonoBehaviour {
 
     [SerializeField]
@@ -13,7 +15,7 @@ public class MatchListPanel:MonoBehaviour {
         AvailableMatchesList.OnAvailableMatchesChanged += AvailableMatchesList_OnAvailableMatchesChanged;
     }
 
-    private void AvailableMatchesList_OnAvailableMatchesChanged(List<MatchInfoSnapshot> matches) {
+    private void AvailableMatchesList_OnAvailableMatchesChanged(List<MatchInfoSnapshot> matches, List<LanConnectionInfo> lan) {
         ClearExistingButton();
         CreateNewJoinGameButtons(matches);
     }

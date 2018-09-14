@@ -58,14 +58,19 @@ public class CustomNetworkManager:NetworkManager {
         if(matchMaker == null) {
             StartMatchMaker();
         }
-
-        Debug.Log("Refresh");
+        
         matchMaker.ListMatches(0, 10, "", true, 0, 0, HandleListMatchesComplete);
     }
 
     void HandleListMatchesComplete(bool success, string extendedinfo, List<MatchInfoSnapshot> responsedata) {
         if(!IsClientConnected())
         AvailableMatchesList.HandleNewMatchList(responsedata);
+    }
+
+    public void JoinMatch(LanConnectionInfo lan) {
+        networkAddress = lan.ipAddress;
+
+        base.StartClient();
     }
 
     public void JoinMatch(MatchInfoSnapshot match) {

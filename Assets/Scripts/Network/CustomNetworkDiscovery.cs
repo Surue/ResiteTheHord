@@ -74,6 +74,14 @@ public class CustomNetworkDiscovery : NetworkDiscovery {
     }
 
     void UpdateMatchInfos() {
-        Debug.Log(lanAddresses.Keys.ToList());
+        //Debug.Log(lanAddresses.Keys.ToList());
+
+        //var keys = lanAddresses.Keys.ToList();
+        //foreach(var key in keys) {
+        //    Debug.Log(key.ipAddress);
+        //    Debug.Log(key.name);
+        //}
+
+        AvailableMatchesList.HandleNewLanList(lanAddresses.Keys.ToList());
     }
 }

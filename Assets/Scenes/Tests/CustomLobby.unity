@@ -602,11 +602,6 @@ Prefab:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 114450123715630890, guid: 6896a4867ce7a2a479edb4980ff11579,
-        type: 2}
-      propertyPath: m_SpawnPrefabs.Array.size
-      value: 2
-      objectReference: {fileID: 0}
     - target: {fileID: 4247927079184186, guid: 6896a4867ce7a2a479edb4980ff11579, type: 2}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -639,19 +634,7 @@ Prefab:
       propertyPath: m_RootOrder
       value: 2
       objectReference: {fileID: 0}
-    - target: {fileID: 114450123715630890, guid: 6896a4867ce7a2a479edb4980ff11579,
-        type: 2}
-      propertyPath: m_SpawnPrefabs.Array.data[1]
-      value: 
-      objectReference: {fileID: 1013236632694570, guid: abe5f0ac868f2aa4294179eb160d404d,
-        type: 2}
-    - target: {fileID: 114450123715630890, guid: 6896a4867ce7a2a479edb4980ff11579,
-        type: 2}
-      propertyPath: discovery
-      value: 
-      objectReference: {fileID: 1801154038}
-    m_RemovedComponents:
-    - {fileID: 114172781872677572, guid: 6896a4867ce7a2a479edb4980ff11579, type: 2}
+    m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6896a4867ce7a2a479edb4980ff11579, type: 2}
   m_IsPrefabAsset: 0
 --- !u!114 &1061621179 stripped
@@ -957,33 +940,6 @@ CanvasRenderer:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1375185213}
   m_CullTransparentMesh: 0
---- !u!1 &1801154037 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1812391930324932, guid: 6896a4867ce7a2a479edb4980ff11579,
-    type: 2}
-  m_PrefabInternal: {fileID: 1037004530}
---- !u!114 &1801154038
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1801154037}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6539a63f7fccbed46b48e770135c3def, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_BroadcastPort: 47777
-  m_BroadcastKey: 2222
-  m_BroadcastVersion: 1
-  m_BroadcastSubVersion: 1
-  m_BroadcastInterval: 1000
-  m_UseNetworkManager: 0
-  m_BroadcastData: HELLO
-  m_ShowGUI: 1
-  m_OffsetX: 0
-  m_OffsetY: 0
-  ip: 
 --- !u!1 &1813916114
 GameObject:
   m_ObjectHideFlags: 0

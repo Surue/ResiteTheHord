@@ -20,7 +20,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4247927079184186}
   - component: {fileID: 114450123715630890}
-  - component: {fileID: 114172781872677572}
+  - component: {fileID: 114090180000654342}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -41,7 +41,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &114172781872677572
+--- !u!114 &114090180000654342
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -49,7 +49,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1812391930324932}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -1553936188, guid: dc443db3e92b4983b9738c1131f555cb, type: 3}
+  m_Script: {fileID: 11500000, guid: 6539a63f7fccbed46b48e770135c3def, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_BroadcastPort: 47777
@@ -59,9 +59,10 @@ MonoBehaviour:
   m_BroadcastInterval: 1000
   m_UseNetworkManager: 1
   m_BroadcastData: HELLO
-  m_ShowGUI: 1
+  m_ShowGUI: 0
   m_OffsetX: 0
   m_OffsetY: 0
+  ip: 
 --- !u!114 &114450123715630890
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -90,6 +91,7 @@ MonoBehaviour:
   m_OnlineScene: Lobby_InGame
   m_SpawnPrefabs:
   - {fileID: 1137613874173276, guid: 6e807e86331eb9e459dc31cc0b972ca0, type: 2}
+  - {fileID: 1013236632694570, guid: abe5f0ac868f2aa4294179eb160d404d, type: 2}
   m_CustomConfig: 0
   m_MaxConnections: 4
   m_ConnectionConfig:
@@ -145,4 +147,4 @@ MonoBehaviour:
   matchSize: 4
   isNetworkActive: 0
   matchMaker: {fileID: 0}
-  discovery: {fileID: 114172781872677572}
+  discovery: {fileID: 114090180000654342}
