@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Networking.Match;
+using UnityEngine.SceneManagement;
 
 public class CustomNetworkManager:NetworkManager {
 
@@ -84,4 +85,21 @@ public class CustomNetworkManager:NetworkManager {
     void HandleJoinedMatch(bool success, string extendedinfo, MatchInfo responsedata) {
         StartClient(responsedata);
     }
+
+    public override void OnServerAddPlayer(NetworkConnection conn, short playerControllerId) {
+        base.OnServerAddPlayer(conn, playerControllerId);
+        if (networkSceneName == "Lobby") {
+            PlayerController[] players = FindObjectsOfType<PlayerController>();
+
+            foreach (PlayerController player in players) {
+                Destroy(player.gameObject);
+            }
+
+            FindObjectOfType<PanelPlayerList>().AddPlayer(conn.connectionId);
+        }
+    }
+}
+
+public class test : NetworkLobbyManager {
+
 }
