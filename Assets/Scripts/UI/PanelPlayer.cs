@@ -6,23 +6,27 @@ using UnityEngine.Networking;
 
 public class PanelPlayer : NetworkBehaviour {
 
-    [SyncVar]
-    public int id;
-
     [SyncVar(hook = "OnIsReady")]
     public bool isReady = false;
-    
-    public void Ready(int id) {
-        if (this.id == id) {
-            isReady = !isReady;
+
+    public Toggle toggle;
+
+    void Start() {
+
+        GameObject panel = GameObject.Find("PanelPlayerList");
+        transform.SetParent(panel.transform);
+
+        if(!hasAuthority) {
+            toggle.gameObject.SetActive(false);
         }
+        
+        StartCoroutine(Initialize());
     }
 
-    public void Initialize(Transform panelTransform) {
-        transform.SetParent(panelTransform);
+    IEnumerator Initialize() {
+        yield return new WaitForEndOfFrame();
+
         transform.localScale = Vector3.one;
-        transform.localRotation = Quaternion.identity;
-        transform.localPosition = Vector3.zero;
     }
 
     void OnIsReady(bool ready) {
@@ -31,5 +35,11 @@ public class PanelPlayer : NetworkBehaviour {
         } else {
             GetComponent<Image>().color = new Color(255, 0, 0);
         }
+    }
+
+    [Command]
+    public void CmdToggleReady(bool ready) {
+        Debug.Log(ready);
+        isReady = ready;
     }
 }

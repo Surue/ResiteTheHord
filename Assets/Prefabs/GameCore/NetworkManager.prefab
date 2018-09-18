@@ -87,11 +87,12 @@ MonoBehaviour:
     type: 2}
   m_AutoCreatePlayer: 1
   m_PlayerSpawnMethod: 0
-  m_OfflineScene: CustomLobby
-  m_OnlineScene: Lobby_InGame
+  m_OfflineScene: MultiplayerMatches
+  m_OnlineScene: Lobby
   m_SpawnPrefabs:
   - {fileID: 1137613874173276, guid: 6e807e86331eb9e459dc31cc0b972ca0, type: 2}
   - {fileID: 1013236632694570, guid: abe5f0ac868f2aa4294179eb160d404d, type: 2}
+  - {fileID: 1477025376209220, guid: 706b6f9158a369d4ca06df8d616ab15c, type: 2}
   m_CustomConfig: 0
   m_MaxConnections: 4
   m_ConnectionConfig:
@@ -148,3 +149,5 @@ MonoBehaviour:
   isNetworkActive: 0
   matchMaker: {fileID: 0}
   discovery: {fileID: 114090180000654342}
+  lobbyPlayerPrefab: {fileID: 1477025376209220, guid: 706b6f9158a369d4ca06df8d616ab15c,
+    type: 2}

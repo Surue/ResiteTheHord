@@ -9,6 +9,10 @@ public class MainMenuController : MonoBehaviour {
         SceneManager.LoadScene(name);
     }
 
+    public void LoadSceneByNameOnServer(string name) {
+        FindObjectOfType<CustomNetworkManager>().ServerChangeScene(name);
+    }
+
     public void Quit() {
         Application.Quit();
     }

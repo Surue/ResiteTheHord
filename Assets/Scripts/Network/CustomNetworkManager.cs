@@ -5,12 +5,24 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Networking.Match;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using Debug = UnityEngine.Debug;
 
 public class CustomNetworkManager:NetworkManager {
 
     float nextRefreshTime = 0;
 
     public CustomNetworkDiscovery discovery;
+
+    public GameObject lobbyPlayerPrefab;
+
+    enum State {
+        MATCH_MAKING,
+        LOBBY,
+        IN_GAME
+    }
+
+    State state = State.MATCH_MAKING;
 
     public void StartHosting() {
         StartMatchMaker();
@@ -43,13 +55,44 @@ public class CustomNetworkManager:NetworkManager {
         networkAddress = a;
     }
 
-    void OnMatchCreated(bool success, string extendedinfo, MatchInfo responsedata) {
-        base.StartHost(responsedata);
+    void OnMatchCreated(bool success, string extendedInfo, MatchInfo responseData) {
+        base.StartHost(responseData);
     }
 
     void Update() {
-        if (Time.time >= nextRefreshTime && !IsClientConnected()) {
-            RefreshMatches();
+
+        switch (state) {
+            case State.MATCH_MAKING:
+                if(Time.time >= nextRefreshTime && !IsClientConnected()) {
+                    RefreshMatches();
+                }
+
+                if (IsClientConnected()) {
+                    state = State.LOBBY;
+                }
+                break;
+
+            case State.LOBBY:
+                PanelPlayer[] players = FindObjectsOfType<PanelPlayer>();
+
+                bool ready = true;
+
+                foreach (PanelPlayer panelPlayer in players) {
+                    if (!panelPlayer.isReady) {
+                        ready = false;
+                        break;
+                    }
+                }
+
+                if (ready) {
+                    GameObject.Find("ButtonLaunch").GetComponent<Button>().interactable = true;
+                } else {
+                    GameObject.Find("ButtonLaunch").GetComponent<Button>().interactable = false;
+                }
+                break;
+
+            case State.IN_GAME:
+                break;
         }
     }
 
@@ -87,19 +130,12 @@ public class CustomNetworkManager:NetworkManager {
     }
 
     public override void OnServerAddPlayer(NetworkConnection conn, short playerControllerId) {
-        base.OnServerAddPlayer(conn, playerControllerId);
         if (networkSceneName == "Lobby") {
-            PlayerController[] players = FindObjectsOfType<PlayerController>();
-
-            foreach (PlayerController player in players) {
-                Destroy(player.gameObject);
-            }
-
-            FindObjectOfType<PanelPlayerList>().AddPlayer(conn.connectionId);
+            GameObject instance = Instantiate(lobbyPlayerPrefab);
+            NetworkServer.AddPlayerForConnection(conn, instance, playerControllerId);
+        } else {
+            GameObject player = (GameObject)Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
+            NetworkServer.AddPlayerForConnection(conn, player, playerControllerId);
         }
     }
-}
-
-public class test : NetworkLobbyManager {
-
 }
