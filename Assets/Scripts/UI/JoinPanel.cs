@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Networking.Match;
 using UnityEngine.UI;
@@ -11,29 +12,30 @@ public class JoinPanel : MonoBehaviour {
 
     bool isLan = false;
 
+    [SerializeField]TextMeshProUGUI matchName;
+
     public void Initialize(MatchInfoSnapshot match, Transform panelTransform, int number) {
         transform.SetParent(panelTransform);
         transform.localScale = Vector3.one;
-        transform.localRotation = Quaternion.identity;
-
-        transform.localPosition = Vector2.zero + new Vector2(0, GetComponent<RectTransform>().sizeDelta.y * number);
 
         this.match = match;
 
-        GetComponentInChildren<Text>().text = "online";
+        matchName.text = this.match.name;
+
+        GetComponentInChildren<Text>().text = "Join";
     }
 
     public void Initialize(LanConnectionInfo lan, Transform panelTransform, int number) {
         transform.SetParent(panelTransform);
+
+        GetComponentInChildren<Text>().text = "Join";
+
         transform.localScale = Vector3.one;
-        transform.localRotation = Quaternion.identity;
 
-        transform.localPosition = Vector2.zero + new Vector2(0, GetComponent<RectTransform>().sizeDelta.y * number);
-        
         isLan = true;
-
-        GetComponentInChildren<Text>().text = "local";
         this.lan = lan;
+
+        matchName.text = this.lan.name;
     }
 
     public void JoinMatch() {

@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657844, g: 0.49641222, b: 0.57481694, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -145,10 +145,10 @@ RectTransform:
   m_Father: {fileID: 322798938}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 699.7207, y: 58.649963}
-  m_SizeDelta: {x: -1399.4, y: -117.4}
+  m_AnchoredPosition: {x: -238.1, y: -60.350037}
+  m_SizeDelta: {x: 476.2, y: 120.6}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &285943392
 MonoBehaviour:
@@ -461,6 +461,7 @@ GameObject:
   - component: {fileID: 901462090}
   - component: {fileID: 901462089}
   - component: {fileID: 901462091}
+  - component: {fileID: 901462092}
   m_Layer: 5
   m_Name: PanelMatches
   m_TagString: Untagged
@@ -533,6 +534,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   joinPanelPrefab: {fileID: 114270495395478260, guid: 123a3410fde000e47a41ea9d592d04fa,
     type: 2}
+--- !u!114 &901462092
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 901462087}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1297475563, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 0
+  m_Spacing: 0
+  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandHeight: 0
+  m_ChildControlWidth: 1
+  m_ChildControlHeight: 0
 --- !u!1 &956555964
 GameObject:
   m_ObjectHideFlags: 0
@@ -735,10 +758,10 @@ RectTransform:
   m_Father: {fileID: 322798938}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 699.76996, y: -60.45002}
-  m_SizeDelta: {x: -1399.5, y: -120.8}
+  m_AnchoredPosition: {x: -238, y: -179.45001}
+  m_SizeDelta: {x: 476, y: 117.2}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1122265694
 MonoBehaviour:

@@ -17,10 +17,6 @@ public class JoinButton : MonoBehaviour {
 
     public void Initialize(MatchInfoSnapshot match, Transform panelTransform) {
         buttonText.text = match.name;
-        transform.SetParent(panelTransform);
-        transform.localScale = Vector3.one;
-        transform.localRotation = Quaternion.identity;
-        transform.localPosition = Vector3.zero;
 
         this.match = match;
     }
