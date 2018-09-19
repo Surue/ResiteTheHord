@@ -74,7 +74,6 @@ public class CustomNetworkManager:NetworkManager {
 
             case State.LOBBY:
                 PanelPlayer[] players = FindObjectsOfType<PanelPlayer>();
-
                 bool ready = true;
 
                 foreach (PanelPlayer panelPlayer in players) {
@@ -84,11 +83,14 @@ public class CustomNetworkManager:NetworkManager {
                     }
                 }
 
-                if (ready) {
-                    GameObject.Find("ButtonLaunch").GetComponent<Button>().interactable = true;
-                } else {
-                    GameObject.Find("ButtonLaunch").GetComponent<Button>().interactable = false;
+                if (SceneManager.GetActiveScene().name == "lobby") {
+                    if (ready) {
+                        GameObject.Find("ButtonLaunch").GetComponent<Button>().interactable = true;
+                    } else {
+                        GameObject.Find("ButtonLaunch").GetComponent<Button>().interactable = false;
+                    }
                 }
+
                 break;
 
             case State.IN_GAME:
@@ -106,9 +108,9 @@ public class CustomNetworkManager:NetworkManager {
         matchMaker.ListMatches(0, 10, "", true, 0, 0, HandleListMatchesComplete);
     }
 
-    void HandleListMatchesComplete(bool success, string extendedinfo, List<MatchInfoSnapshot> responsedata) {
+    void HandleListMatchesComplete(bool success, string extendedInfo, List<MatchInfoSnapshot> responseData) {
         if(!IsClientConnected())
-        AvailableMatchesList.HandleNewMatchList(responsedata);
+        AvailableMatchesList.HandleNewMatchList(responseData);
     }
 
     public void JoinMatch(LanConnectionInfo lan) {
@@ -125,8 +127,8 @@ public class CustomNetworkManager:NetworkManager {
         matchMaker.JoinMatch(match.networkId, "", "", "", 0, 0, HandleJoinedMatch);
     }
 
-    void HandleJoinedMatch(bool success, string extendedinfo, MatchInfo responsedata) {
-        StartClient(responsedata);
+    void HandleJoinedMatch(bool success, string extendedInfo, MatchInfo responseData) {
+        StartClient(responseData);
     }
 
     public override void OnServerAddPlayer(NetworkConnection conn, short playerControllerId) {

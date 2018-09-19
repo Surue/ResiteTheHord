@@ -25,19 +25,15 @@ public class Health : NetworkBehaviour {
         if (currentHealth <= 0) {
             if (destroyOnDeath) {
                 Destroy(gameObject);
-            }
-            else {
+            } else {
                 currentHealth = MAX_HEALTH;
-                RpcRespawn();
-
+                GetComponent<PlayerController>().CmdOnDeath();
             }
-            Debug.Log("Dead!");
         }
-        
     }
 
     [ClientRpc]
-    void RpcRespawn() {
+    public void RpcRespawn() {
         if (isLocalPlayer) {
             transform.position = Vector3.zero;
         }

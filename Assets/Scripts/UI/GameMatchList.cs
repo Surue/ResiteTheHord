@@ -34,18 +34,14 @@ public class GameMatchList : MonoBehaviour {
     }
 
     void CreateNewJoinGameButtons(List<MatchInfoSnapshot> matches, List<LanConnectionInfo> lan) {
-        int number = 0;
-
         foreach(LanConnectionInfo l in lan) {
             JoinPanel button = Instantiate(joinPanelPrefab);
-            button.Initialize(l, transform, number);
-            number++;
+            button.Initialize(l, transform);
         }
 
         foreach(MatchInfoSnapshot match in matches) {
             JoinPanel button = Instantiate(joinPanelPrefab);
-            button.Initialize(match, transform, number);
-            number++;
+            button.Initialize(match, transform);
         }
     }
 }

@@ -16,20 +16,12 @@ public class GameManager : NetworkBehaviour {
     int numberOfEnemiesPerSpawn = 1;
     int spawnerFinishedSpawn = 0;
 
-    static GameManager instance;
-    public static GameManager Instance {
-        get {
-            return instance;
-        }
-    }
+    //UI
+    CountDownTimer countDownTimer;
 
-    private void Awake() {
-        if(instance == null) {
-            instance = this;
-        } else if(instance != this) {
-            Destroy(gameObject);
-        }
-    }
+    //Life system
+    int lifeRemaining = 5;
+    List<GameObject> playersWaitingToRespawn = new List<GameObject>();
 
     enum State {
         INTRO,
@@ -47,6 +39,8 @@ public class GameManager : NetworkBehaviour {
         if(skipIntro) {
             state = State.INITIALIZE;
         }
+
+        countDownTimer = FindObjectOfType<CountDownTimer>();
     }
 	
 	// Update is called once per frame
@@ -104,7 +98,7 @@ public class GameManager : NetworkBehaviour {
 
             case State.WAIT_END_SPAWN:
                 if (spawnerFinishedSpawn == enemySpawners.Length) {
-                    Debug.Log("FINISHED");
+                    countDownTimer.RpcSetTime(timeBeforeNextWaves);
                     state = State.WAIT_NEXT_WAVE;
                     spawnerFinishedSpawn = 0;
                 }
@@ -113,7 +107,24 @@ public class GameManager : NetworkBehaviour {
             case State.END_GAME:
                 break;
 	    }
+
+	    if (playersWaitingToRespawn.Count > 0) {
+	        if (lifeRemaining > 0) {
+	            lifeRemaining -= 1;
+                
+                playersWaitingToRespawn[playersWaitingToRespawn.Count - 1].GetComponent<Health>().RpcRespawn();
+                playersWaitingToRespawn.RemoveAt(playersWaitingToRespawn.Count - 1);
+	        }else if (players.Length == playersWaitingToRespawn.Count) {
+	            FindObjectOfType<CustomNetworkManager>().ServerChangeScene("lobby");
+	        }
+	    }
 	}
+
+    public void OnPlayerDeath(GameObject player) {
+        Debug.Log("A player died : " + lifeRemaining);
+
+        playersWaitingToRespawn.Add(player);
+    }
 
     public void FinishedSpawn() {
         spawnerFinishedSpawn++;

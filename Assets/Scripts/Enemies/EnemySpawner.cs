@@ -12,11 +12,17 @@ public class EnemySpawner : NetworkBehaviour {
     static float TIME_BETWEEEN_SPAWN = 0.5f;
     float timeSinceLastSpawn = 0;
 
+    GameManager gameManager;
+
+    void Start() {
+        gameManager = FindObjectOfType<GameManager>();
+    }
+
     public void AddEnemiesToSpawn(int nb) {
         numberOfEnemiesToSpawn += nb;
 
         if (numberOfEnemiesToSpawn == 0) {
-            GameManager.Instance.FinishedSpawn();
+            gameManager.FinishedSpawn();
         }
     }
 
@@ -41,7 +47,7 @@ public class EnemySpawner : NetworkBehaviour {
 
                 numberOfEnemiesToSpawn -= 1;
                 if(numberOfEnemiesToSpawn <= 0) {
-                    GameManager.Instance.FinishedSpawn();
+                    gameManager.FinishedSpawn();
                     timeSinceLastSpawn = 0;
                 }
             } else {

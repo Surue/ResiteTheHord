@@ -39,7 +39,6 @@ public class PanelPlayer : NetworkBehaviour {
 
     [Command]
     public void CmdToggleReady(bool ready) {
-        Debug.Log(ready);
         isReady = ready;
     }
 }

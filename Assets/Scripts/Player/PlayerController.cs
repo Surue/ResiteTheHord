@@ -75,6 +75,13 @@ public class PlayerController : NetworkBehaviour {
         Destroy(bullet, 2f);
     }
 
+    [Command]
+    public void CmdOnDeath() {
+        FindObjectOfType<GameManager>().OnPlayerDeath(gameObject);
+
+        transform.position = new Vector3(transform.position.x, transform.position.y, 10);
+    }
+
     public override void OnStartLocalPlayer() {
         GetComponentInChildren<SpriteRenderer>().color = Color.blue;
     }

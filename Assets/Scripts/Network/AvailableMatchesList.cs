@@ -13,11 +13,19 @@ public class AvailableMatchesList:MonoBehaviour {
     static List<LanConnectionInfo> lan = new List<LanConnectionInfo>();
 
     public static void HandleNewMatchList(List<MatchInfoSnapshot> matchList) {
+        if (matches == matchList) {
+            return;
+        }
+
         matches = matchList;
         OnAvailableMatchesChanged(matches, lan);
     }
 
     public static void HandleNewLanList(List<LanConnectionInfo> matchList) {
+        if(lan == matchList) {
+            return;
+        }
+
         lan = matchList;
         OnAvailableLanChanged(matches, lan);
     }

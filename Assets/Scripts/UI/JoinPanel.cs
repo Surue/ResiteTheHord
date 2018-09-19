@@ -14,7 +14,7 @@ public class JoinPanel : MonoBehaviour {
 
     [SerializeField]TextMeshProUGUI matchName;
 
-    public void Initialize(MatchInfoSnapshot match, Transform panelTransform, int number) {
+    public void Initialize(MatchInfoSnapshot match, Transform panelTransform) {
         transform.SetParent(panelTransform);
         transform.localScale = Vector3.one;
 
@@ -25,7 +25,7 @@ public class JoinPanel : MonoBehaviour {
         GetComponentInChildren<Text>().text = "Join";
     }
 
-    public void Initialize(LanConnectionInfo lan, Transform panelTransform, int number) {
+    public void Initialize(LanConnectionInfo lan, Transform panelTransform) {
         transform.SetParent(panelTransform);
 
         GetComponentInChildren<Text>().text = "Join";
