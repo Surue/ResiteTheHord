@@ -18,14 +18,21 @@ public class EnemyController : NetworkBehaviour {
     [Header("Attack")]
     [SerializeField] float attackRange = 2f;
     [SerializeField] bool canMultipleAttack = false;
-    List<GameObject> targets = new List<GameObject>();
+    List<GameObject> attackTargets = new List<GameObject>();
+
+    [Header("Animation")]
+    [SerializeField] float rotationSpeed = 10;
+
+    [SyncVar]
+    Vector2 targetPosition;
 
     enum State {
         INITIALIZE,
         IDLE,
         MOVE,
         MOVE_TO_PLAYER,
-        ATTACK
+        ATTACK,
+        ATTACK_ANIMATION
     }
 
     State state = State.INITIALIZE;
@@ -37,13 +44,13 @@ public class EnemyController : NetworkBehaviour {
 
     // Use this for initialization
     void Start() {
+        body = GetComponent<Rigidbody2D>();
+
         if(!isServer) {
             return;
         }
 
         StartCoroutine(FindAllObjects());
-
-        body = GetComponent<Rigidbody2D>();
     }
 
     IEnumerator FindAllObjects() {
@@ -56,23 +63,14 @@ public class EnemyController : NetworkBehaviour {
         state = State.IDLE;
     }
 
+    void FixedUpdate() {
+        body.velocity = (targetPosition - (Vector2)transform.position).normalized * 2f;
+    }
+
     // Update is called once per frame
+    [Server]
     void Update() {
-        switch (state) {
-            case State.INITIALIZE:
-            case State.IDLE:
-            case State.MOVE:
-                GetComponent<SpriteRenderer>().color = Color.magenta;
-                break;
-
-            case State.ATTACK:
-                GetComponent<SpriteRenderer>().color = Color.red;
-                break;
-        }
-
-        if(!isServer) {
-            return;
-        }
+        targetPosition = transform.position;
 
         switch(state) {
             case State.INITIALIZE:
@@ -90,7 +88,7 @@ public class EnemyController : NetworkBehaviour {
                     state = State.IDLE;
                 }
 
-                body.velocity = (path[0] - (Vector2)transform.position).normalized * 2f;
+                targetPosition = path[0];
 
                 if(Vector2.Distance((Vector3)transform.position, path[0]) < 0.1f) {
                     path.RemoveAt(0);
@@ -106,12 +104,11 @@ public class EnemyController : NetworkBehaviour {
                 } else {
                     timerCheckPath += Time.deltaTime;
                 }
-
                 break;
 
             case State.ATTACK:
                 body.velocity = Vector2.zero;
-                foreach(GameObject target in targets) {
+                foreach(GameObject target in attackTargets) {
                     if(target.GetComponent<Health>()) {
                         target.GetComponent<Health>().TakeDamage(1);
                     }
@@ -119,7 +116,11 @@ public class EnemyController : NetworkBehaviour {
 
                 path = new List<Vector2>();
 
-                state = State.IDLE;
+                RpcStartAnimation();
+                state = State.ATTACK_ANIMATION;
+                break;
+
+            case State.ATTACK_ANIMATION:
                 break;
         }
 
@@ -133,6 +134,27 @@ public class EnemyController : NetworkBehaviour {
         }
     }
 
+    [ClientRpc]
+    void RpcStartAnimation() {
+        StartCoroutine(AnimationAttack());
+    }
+    
+    IEnumerator AnimationAttack() {
+        GetComponent<SpriteRenderer>().color = Color.red;
+
+        while (transform.eulerAngles.z < 360f / 3f) {
+            transform.rotation = Quaternion.Euler(0, 0, transform.eulerAngles.z + rotationSpeed);
+            yield return new WaitForEndOfFrame();
+        }
+
+        transform.rotation = Quaternion.identity;
+
+        state = State.IDLE;
+
+        GetComponent<SpriteRenderer>().color = Color.magenta;
+    }
+
+    [Server]
     bool CheckAttackTarget() {
         Collider2D[] possibleTarget;
         LayerMask mask = 1 << LayerMask.NameToLayer("Player");
@@ -142,7 +164,7 @@ public class EnemyController : NetworkBehaviour {
         if(possibleTarget.Length > 0) {
             if(canMultipleAttack) {
                 for(int i = 0;i < possibleTarget.Length;i++) {
-                    targets.Add(possibleTarget[i].gameObject);
+                    attackTargets.Add(possibleTarget[i].gameObject);
                 }
 
                 return true;
@@ -152,7 +174,7 @@ public class EnemyController : NetworkBehaviour {
 
                 for(int i = 0;i < possibleTarget.Length;i++) {
                     if(possibleTarget[i].gameObject.layer == LayerMask.NameToLayer("Player")) {
-                        targets.Add(possibleTarget[i].gameObject);
+                        attackTargets.Add(possibleTarget[i].gameObject);
                         return true;
                     }
 
@@ -165,7 +187,7 @@ public class EnemyController : NetworkBehaviour {
 
                 }
 
-                targets.Add(possibleTarget[indexMin].gameObject);
+                attackTargets.Add(possibleTarget[indexMin].gameObject);
 
                 return true;
             }
