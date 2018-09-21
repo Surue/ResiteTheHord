@@ -14,6 +14,8 @@ public class Health : NetworkBehaviour {
 
     [SyncVar(hook = "OnChangeHealth")]
     public int currentHealth = MAX_HEALTH;
+    
+    [SerializeField] ParticleSystem explosionParticleSystem;
 
     public void TakeDamage(int damage) {
         if (!isServer) {
@@ -24,6 +26,11 @@ public class Health : NetworkBehaviour {
 
         if (currentHealth <= 0) {
             if (destroyOnDeath) {
+                if (explosionParticleSystem != null) {
+                    GameObject instance = Instantiate(explosionParticleSystem).gameObject;
+                    instance.transform.position = transform.position;
+                }
+
                 Destroy(gameObject);
             } else {
                 currentHealth = MAX_HEALTH;

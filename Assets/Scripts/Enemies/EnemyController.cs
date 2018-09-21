@@ -22,6 +22,8 @@ public class EnemyController : NetworkBehaviour {
 
     [Header("Animation")]
     [SerializeField] float rotationSpeed = 10;
+    [SerializeField] ParticleSystem attackParticleSystem;
+    Animator animator;
 
     [SyncVar]
     Vector2 targetPosition;
@@ -45,6 +47,7 @@ public class EnemyController : NetworkBehaviour {
     // Use this for initialization
     void Start() {
         body = GetComponent<Rigidbody2D>();
+        animator = GetComponentInChildren<Animator>();
 
         if(!isServer) {
             return;
@@ -140,7 +143,8 @@ public class EnemyController : NetworkBehaviour {
     }
     
     IEnumerator AnimationAttack() {
-        GetComponent<SpriteRenderer>().color = Color.red;
+        animator.SetTrigger("Attack");
+        attackParticleSystem.Play();
 
         while (transform.eulerAngles.z < 360f / 3f) {
             transform.rotation = Quaternion.Euler(0, 0, transform.eulerAngles.z + rotationSpeed);
@@ -150,8 +154,6 @@ public class EnemyController : NetworkBehaviour {
         transform.rotation = Quaternion.identity;
 
         state = State.IDLE;
-
-        GetComponent<SpriteRenderer>().color = Color.magenta;
     }
 
     [Server]
