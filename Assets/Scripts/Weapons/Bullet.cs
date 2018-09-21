@@ -15,13 +15,22 @@ public class Bullet : NetworkBehaviour {
 
     [SerializeField] TrailRenderer trail;
 
+    PlayerController owner;
+
     void Start() {
+        
+    }
+
+    public void Initialize(PlayerController id) {
         sprite.color = bulletColor;
         spriteLight.color = bulletColor;
         trail.startColor = bulletColor;
         trail.endColor = bulletColor;
+
+        owner = id;
     }
     
+    [Server]
     void OnCollisionEnter2D(Collision2D other) {
         if (other.gameObject.CompareTag("Player")) {
             return;
@@ -31,7 +40,18 @@ public class Bullet : NetworkBehaviour {
         Health health = hit.GetComponent<Health>();
 
         if (health != null) {
-            health.TakeDamage(10);
+            health.TakeDamage(1);
+        }
+
+        EnemyController enemy = hit.GetComponent<EnemyController>();
+
+        if (enemy != null) {
+            enemy.TakeDamage(1);
+        }
+
+        Score score = hit.GetComponent<Score>();
+        if (score != null) {
+            owner.AddScore(hit.transform, score.score);
         }
 
         GameObject instance = Instantiate(explosionParticle).gameObject;

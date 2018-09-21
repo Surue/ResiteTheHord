@@ -17,6 +17,7 @@ public class Health : NetworkBehaviour {
     
     [SerializeField] ParticleSystem explosionParticleSystem;
 
+    [Server]
     public void TakeDamage(int damage) {
         if (!isServer) {
             return;
@@ -26,9 +27,10 @@ public class Health : NetworkBehaviour {
 
         if (currentHealth <= 0) {
             if (destroyOnDeath) {
-                if (explosionParticleSystem != null) {
-                    GameObject instance = Instantiate(explosionParticleSystem).gameObject;
-                    instance.transform.position = transform.position;
+                RpcDestroy();
+
+                if (GetComponent<Score>()) {
+
                 }
 
                 Destroy(gameObject);
@@ -43,6 +45,14 @@ public class Health : NetworkBehaviour {
     public void RpcRespawn() {
         if (isLocalPlayer) {
             transform.position = Vector3.zero;
+        }
+    }
+
+    [ClientRpc]
+    public void RpcDestroy() {
+        if (explosionParticleSystem != null) {
+            GameObject instance = Instantiate(explosionParticleSystem).gameObject;
+            instance.transform.position = transform.position;
         }
     }
 

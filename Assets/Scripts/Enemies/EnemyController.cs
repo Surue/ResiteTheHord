@@ -15,6 +15,9 @@ public class EnemyController : NetworkBehaviour {
     static float TIME_CHECK_TARGET = 0.5f;
     float timerCheckTarget = 0f;
 
+    [Header("Health")]
+    [SerializeField] int lifePoint = 1;
+
     [Header("Attack")]
     [SerializeField] float attackRange = 2f;
     [SerializeField] bool canMultipleAttack = false;
@@ -23,6 +26,7 @@ public class EnemyController : NetworkBehaviour {
     [Header("Animation")]
     [SerializeField] float rotationSpeed = 10;
     [SerializeField] ParticleSystem attackParticleSystem;
+    [SerializeField] ParticleSystem deathParticleSystem;
     Animator animator;
 
     [SyncVar]
@@ -208,5 +212,23 @@ public class EnemyController : NetworkBehaviour {
 
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, attackRange);
+    }
+
+    [Server] //QUESTION
+    public void TakeDamage(int damage) {
+
+        lifePoint -= damage;
+
+        if (lifePoint <= 0) {
+            RpcDeath();
+
+            Destroy(gameObject, 0.01f);
+        }
+    }
+
+    [ClientRpc]
+    void RpcDeath() {
+        GameObject instance = Instantiate(deathParticleSystem).gameObject;
+        instance.transform.position = transform.position;
     }
 }

@@ -20,6 +20,9 @@ public class PlayerController : NetworkBehaviour {
     Vector3 movement;
     [SerializeField] float speed = 4f;
 
+    //Score
+    int score = 0;
+
 	// Use this for initialization
 	void Start () {
         if(isLocalPlayer)
@@ -70,6 +73,8 @@ public class PlayerController : NetworkBehaviour {
 
         bullet.GetComponentInChildren<Rigidbody2D>().velocity = bullet.transform.up * bulletSpeed;
 
+        bullet.GetComponent<Bullet>().Initialize(this);
+
         NetworkServer.Spawn(bullet);
 
         Destroy(bullet, 2f);
@@ -84,5 +89,12 @@ public class PlayerController : NetworkBehaviour {
 
     public override void OnStartLocalPlayer() {
         GetComponentInChildren<SpriteRenderer>().color = Color.blue;
+    }
+
+    public void AddScore(Transform t, int score) {
+        if (isLocalPlayer) {
+            ScoreController.Instance.TargetDisplayScore(connectionToClient, t.position, score);
+            this.score += score;
+        }
     }
 }
