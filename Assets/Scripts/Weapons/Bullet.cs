@@ -18,15 +18,13 @@ public class Bullet : NetworkBehaviour {
     PlayerController owner;
 
     void Start() {
-        
-    }
-
-    public void Initialize(PlayerController id) {
         sprite.color = bulletColor;
         spriteLight.color = bulletColor;
         trail.startColor = bulletColor;
         trail.endColor = bulletColor;
+    }
 
+    public void Initialize(PlayerController id) {
         owner = id;
     }
     
@@ -49,6 +47,19 @@ public class Bullet : NetworkBehaviour {
             enemy.TakeDamage(1, owner);
         }
 
+        RpcInsantiateExplosionParticles();
+
+        GameObject instance = Instantiate(explosionParticle).gameObject;
+        instance.transform.position = (Vector2)transform.position - GetComponent<Rigidbody2D>().velocity * 0.05f;
+
+        ParticleSystem.MainModule main = instance.GetComponent<ParticleSystem>().main;
+        main.startColor = bulletColor;
+
+        Destroy(gameObject);
+    }
+
+    [ClientRpc]
+    void RpcInsantiateExplosionParticles() {
         GameObject instance = Instantiate(explosionParticle).gameObject;
         instance.transform.position = (Vector2)transform.position - GetComponent<Rigidbody2D>().velocity * 0.05f;
 
@@ -56,7 +67,5 @@ public class Bullet : NetworkBehaviour {
         main.startColor = bulletColor;
 
         Destroy(instance, 0.3f);
-
-        Destroy(gameObject);
     }
 }
