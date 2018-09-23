@@ -21,6 +21,12 @@ public class PanelPlayer : NetworkBehaviour {
         }
         
         StartCoroutine(Initialize());
+
+        if(isReady) {
+            GetComponent<Image>().color = new Color(0, 255, 0);
+        } else {
+            GetComponent<Image>().color = new Color(255, 0, 0);
+        }
     }
 
     IEnumerator Initialize() {
