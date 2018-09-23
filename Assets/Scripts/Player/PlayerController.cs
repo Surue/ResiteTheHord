@@ -91,10 +91,9 @@ public class PlayerController : NetworkBehaviour {
         GetComponentInChildren<SpriteRenderer>().color = Color.blue;
     }
 
-    public void AddScore(Transform t, int score) {
-        if (isLocalPlayer) {
-            ScoreController.Instance.TargetDisplayScore(connectionToClient, t.position, score);
-            this.score += score;
-        }
+    [Command]
+    public void CmdAddScore(Vector3 pos, int score) {
+        this.score += score;
+        ScoreController.Instance.TargetDisplayScore(connectionToClient, pos, score);
     }
 }

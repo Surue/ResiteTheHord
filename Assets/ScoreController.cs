@@ -24,9 +24,9 @@ public class ScoreController : NetworkBehaviour {
     }
 
     [TargetRpc]
-    public void TargetDisplayScore(NetworkConnection conn, Vector3 p, int score) {
+    public void TargetDisplayScore(NetworkConnection target, Vector3 pos, int score) {
         GameObject instance = Instantiate(scoreText);
-        instance.transform.position = p;
+        instance.transform.position = pos;
 
         instance.GetComponentInChildren<TextMeshProUGUI>().text = "+" + score.ToString();
     }

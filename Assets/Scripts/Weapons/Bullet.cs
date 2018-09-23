@@ -46,12 +46,7 @@ public class Bullet : NetworkBehaviour {
         EnemyController enemy = hit.GetComponent<EnemyController>();
 
         if (enemy != null) {
-            enemy.TakeDamage(1);
-        }
-
-        Score score = hit.GetComponent<Score>();
-        if (score != null) {
-            owner.AddScore(hit.transform, score.score);
+            enemy.TakeDamage(1, owner);
         }
 
         GameObject instance = Instantiate(explosionParticle).gameObject;
