@@ -27,9 +27,9 @@ public class Bullet : NetworkBehaviour {
     public void Initialize(PlayerController id) {
         owner = id;
     }
-    
+
     [Server]
-    void OnCollisionEnter2D(Collision2D other) {
+    void OnTriggerEnter2D(Collider2D other) {
         if (other.gameObject.CompareTag("Player")) {
             return;
         }
@@ -50,7 +50,7 @@ public class Bullet : NetworkBehaviour {
         RpcInsantiateExplosionParticles();
 
         GameObject instance = Instantiate(explosionParticle).gameObject;
-        instance.transform.position = (Vector2)transform.position - GetComponent<Rigidbody2D>().velocity * 0.05f;
+        instance.transform.position = (Vector2)transform.position - GetComponent<Rigidbody2D>().velocity * 0.01f;
 
         ParticleSystem.MainModule main = instance.GetComponent<ParticleSystem>().main;
         main.startColor = bulletColor;
@@ -61,7 +61,7 @@ public class Bullet : NetworkBehaviour {
     [ClientRpc]
     void RpcInsantiateExplosionParticles() {
         GameObject instance = Instantiate(explosionParticle).gameObject;
-        instance.transform.position = (Vector2)transform.position - GetComponent<Rigidbody2D>().velocity * 0.05f;
+        instance.transform.position = (Vector2)transform.position - GetComponent<Rigidbody2D>().velocity * 0.04f;
 
         ParticleSystem.MainModule main = instance.GetComponent<ParticleSystem>().main;
         main.startColor = bulletColor;
