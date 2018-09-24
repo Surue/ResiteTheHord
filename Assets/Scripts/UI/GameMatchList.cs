@@ -11,9 +11,14 @@ public class GameMatchList : MonoBehaviour {
 
     List<LanConnectionInfo> lanAdresses = new List<LanConnectionInfo>();
 
-    void Awake() {
+    void Start() {
         AvailableMatchesList.OnAvailableMatchesChanged += AvailableMatchesList_OnAvailableMatchesChanged;
         AvailableMatchesList.OnAvailableLanChanged += AvailableMatchesList_OnAvailableLanChanged;
+    }
+
+    void OnDestroy() {
+        AvailableMatchesList.OnAvailableMatchesChanged -= AvailableMatchesList_OnAvailableMatchesChanged;
+        AvailableMatchesList.OnAvailableLanChanged -= AvailableMatchesList_OnAvailableLanChanged;
     }
 
     private void AvailableMatchesList_OnAvailableMatchesChanged(List<MatchInfoSnapshot> matches, List<LanConnectionInfo> lan) {

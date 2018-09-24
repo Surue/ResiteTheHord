@@ -6,7 +6,6 @@ using UnityEngine.Networking;
 using UnityEngine.Networking.Match;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using Debug = UnityEngine.Debug;
 
 public class CustomNetworkManager:NetworkManager {
 
@@ -24,30 +23,23 @@ public class CustomNetworkManager:NetworkManager {
 
     State state = State.MATCH_MAKING;
 
+    bool isClient = false;
+    bool isServer = false;
+
     public void StartHosting() {
+        isServer = true;
         StartMatchMaker();
         matchMaker.CreateMatch("Nico", 4, true, "", "", "", 0, 0, OnMatchCreated);
     }
 
-    public override void OnStartHost() {
-        //discovery.Initialize();
-    }
-
-    public override void OnStartClient(NetworkClient client) {
-        //discovery.showGUI = false;
-    }
-
-    public override void OnStopClient() {
-        //discovery.StopBroadcast();
-        //discovery.showGUI = true;
-    }
-
     public void StartLan() {
+        isServer = true;
         base.StartHost();
         discovery.StartBroadcast();
     }
 
     public void JoinLan() {
+        isClient = true;
         base.StartClient();
     }
 
@@ -114,12 +106,14 @@ public class CustomNetworkManager:NetworkManager {
     }
 
     public void JoinMatch(LanConnectionInfo lan) {
+        isClient = true;
         networkAddress = lan.ipAddress;
-
+        discovery.StopBroadcast();
         base.StartClient();
     }
 
     public void JoinMatch(MatchInfoSnapshot match) {
+        isClient = true;
         if (matchMaker == null) {
             StartMatchMaker();
         }
@@ -139,5 +133,37 @@ public class CustomNetworkManager:NetworkManager {
             GameObject player = (GameObject)Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
             NetworkServer.AddPlayerForConnection(conn, player, playerControllerId);
         }
+    }
+
+    public void Disconnect() {
+
+        while (discovery.running) {
+            discovery.StopBroadcast();
+        }
+
+        if(matchMaker != null) {
+            StopMatchMaker();
+            matchMaker = null;
+        }
+
+        if (isServer) {
+
+            StopHost();
+            isClient = false;
+        }
+
+        if (isClient) {
+            StopClient();
+            isClient = false;
+        }
+
+        StartCoroutine(ReconnectBroadcast());
+    }
+
+    IEnumerator ReconnectBroadcast() {
+        yield return new WaitForSeconds(2);
+
+        discovery.Initialize();
+        discovery.StartAsClient();
     }
 }
