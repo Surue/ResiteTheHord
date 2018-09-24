@@ -46,8 +46,6 @@ public class GameManager : NetworkBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-        //Debug.Log(state);
-
 	    switch (state) {
             case State.INTRO:
                 break;

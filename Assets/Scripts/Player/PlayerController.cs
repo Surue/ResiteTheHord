@@ -21,6 +21,7 @@ public class PlayerController : NetworkBehaviour {
     [SerializeField] float speed = 4f;
 
     //Score
+    [SyncVar]
     int score = 0;
 
 	// Use this for initialization
@@ -95,5 +96,9 @@ public class PlayerController : NetworkBehaviour {
     public void CmdAddScore(Vector3 pos, int score) {
         this.score += score;
         ScoreController.Instance.TargetDisplayScore(connectionToClient, pos, score);
+    }
+
+    public int GetScore() {
+        return score;
     }
 }
