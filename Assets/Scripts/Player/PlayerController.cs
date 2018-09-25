@@ -1,10 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Experimental.Rendering;
+﻿using UnityEngine;
 using UnityEngine.Networking;
 
 public class PlayerController : NetworkBehaviour {
+
+    //Visual
+    [SyncVar(hook = "OnColorChanged")] Color color = Color.black;
 
     //Weapon
     [Header("Weapon")]
@@ -24,10 +24,14 @@ public class PlayerController : NetworkBehaviour {
     [SyncVar]
     int score = 0;
 
-	// Use this for initialization
+	//Use this for initialization
 	void Start () {
-        if(isLocalPlayer)
-	    FindObjectOfType<cameraController>().focusedObject = gameObject;
+	    GetComponent<SpriteRenderer>().color = color;
+
+	    if (isLocalPlayer) {
+	        FindObjectOfType<cameraController>().focusedObject = gameObject;
+	        CmdSetColor(FindObjectOfType<PlayerInfoController>().GetColor());
+	    }
 
 	    body = GetComponent<Rigidbody2D>();
 	}
@@ -42,8 +46,17 @@ public class PlayerController : NetworkBehaviour {
         body.velocity = movement;
     }
 
+    [Command]
+    public void CmdSetColor(Color c) {
+        color = c;
+    }
+
+    void OnColorChanged(Color c) {
+        GetComponentInChildren<SpriteRenderer>().color = c;
+    }
+
     // Update is called once per frame
-	void Update () {
+    void Update () {
 	    if (!isLocalPlayer) {
 	        return;
 	    }
