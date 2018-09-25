@@ -1,5 +1,7 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.Networking;
+using Random = UnityEngine.Random;
 
 public class PlayerController : NetworkBehaviour {
 
@@ -23,14 +25,17 @@ public class PlayerController : NetworkBehaviour {
     //Score
     [SyncVar]
     int score = 0;
+    [SyncVar]
+    string username = "";
 
 	//Use this for initialization
 	void Start () {
-	    GetComponent<SpriteRenderer>().color = color;
+	    GetComponentInChildren<SpriteRenderer>().color = color;
 
 	    if (isLocalPlayer) {
 	        FindObjectOfType<cameraController>().focusedObject = gameObject;
 	        CmdSetColor(FindObjectOfType<PlayerInfoController>().GetColor());
+            CmdSetName(FindObjectOfType<PlayerInfoController>().GetName());
 	    }
 
 	    body = GetComponent<Rigidbody2D>();
@@ -49,6 +54,11 @@ public class PlayerController : NetworkBehaviour {
     [Command]
     public void CmdSetColor(Color c) {
         color = c;
+    }
+
+    [Command]
+    public void CmdSetName(string n) {
+        username = n;
     }
 
     void OnColorChanged(Color c) {
@@ -113,5 +123,13 @@ public class PlayerController : NetworkBehaviour {
 
     public int GetScore() {
         return score;
+    }
+
+    public string GetName() {
+        return username;
+    }
+
+    public Color GetColor() {
+        return color;
     }
 }

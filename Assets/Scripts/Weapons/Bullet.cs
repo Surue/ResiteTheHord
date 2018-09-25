@@ -7,6 +7,7 @@ public class Bullet : NetworkBehaviour {
     [SerializeField]
     ParticleSystem explosionParticle;
 
+    [SyncVar(hook = "OnColorChanged")]
     [SerializeField] Color bulletColor;
 
     [SerializeField] SpriteRenderer sprite;
@@ -26,6 +27,20 @@ public class Bullet : NetworkBehaviour {
 
     public void Initialize(PlayerController id) {
         owner = id;
+
+        bulletColor = id.GetColor();
+    }
+
+    [Command]
+    void CmdSetColor(Color c) {
+        bulletColor = c;
+    }
+
+    void OnColorChanged(Color c) {
+        sprite.color = c;
+        spriteLight.color = c;
+        trail.startColor = c;
+        trail.endColor = c;
     }
 
     [Server]

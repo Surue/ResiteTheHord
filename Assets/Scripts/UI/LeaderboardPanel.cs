@@ -25,7 +25,7 @@ public class LeaderboardPanel : MonoBehaviour {
             List<PlayerController> orderedPlayers = players.OrderByDescending(x => x.GetScore()).ToList();
 
             foreach (PlayerController player in orderedPlayers) {
-                t += "P" + player.netId + " : " + player.GetScore().ToString();
+                t += player.GetName() + " : " + player.GetScore().ToString();
                 t += "\n";
                 i++;
             }
