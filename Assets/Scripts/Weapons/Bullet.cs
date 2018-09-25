@@ -62,7 +62,7 @@ public class Bullet : NetworkBehaviour {
             enemy.TakeDamage(1, owner);
         }
 
-        RpcInsantiateExplosionParticles();
+        RpcDestroy();
 
         GameObject instance = Instantiate(explosionParticle).gameObject;
         instance.transform.position = (Vector2)transform.position - GetComponent<Rigidbody2D>().velocity * 0.01f;
@@ -70,11 +70,24 @@ public class Bullet : NetworkBehaviour {
         ParticleSystem.MainModule main = instance.GetComponent<ParticleSystem>().main;
         main.startColor = bulletColor;
 
-        Destroy(gameObject);
+        if(!isClient && isServer) {
+            NetworkServer.Destroy(gameObject);
+        }
     }
 
+    //[ClientRpc]
+    //void RpcInsantiateExplosionParticles() {
+    //    GameObject instance = Instantiate(explosionParticle).gameObject;
+    //    instance.transform.position = (Vector2)transform.position - GetComponent<Rigidbody2D>().velocity * 0.04f;
+
+    //    ParticleSystem.MainModule main = instance.GetComponent<ParticleSystem>().main;
+    //    main.startColor = bulletColor;
+
+    //    Destroy(instance, 0.3f);
+    //}
+
     [ClientRpc]
-    void RpcInsantiateExplosionParticles() {
+    void RpcDestroy() {
         GameObject instance = Instantiate(explosionParticle).gameObject;
         instance.transform.position = (Vector2)transform.position - GetComponent<Rigidbody2D>().velocity * 0.04f;
 
@@ -82,5 +95,9 @@ public class Bullet : NetworkBehaviour {
         main.startColor = bulletColor;
 
         Destroy(instance, 0.3f);
+
+        if(isServer) {
+            NetworkServer.Destroy(gameObject);
+        }
     }
 }

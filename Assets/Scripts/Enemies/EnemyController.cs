@@ -214,7 +214,7 @@ public class EnemyController : NetworkBehaviour {
         Gizmos.DrawWireSphere(transform.position, attackRange);
     }
 
-    [Server] //QUESTION pour savoir si une fonction appellée depuis le serveur doit être contrôlée 
+    [Server]
     public void TakeDamage(int damage, PlayerController bulletOwner) {
 
         lifePoint -= damage;
@@ -224,15 +224,17 @@ public class EnemyController : NetworkBehaviour {
             RpcDeath(); //For all clients
 
             //for host -> Destroy to soon
-            GameObject instance = Instantiate(deathParticleSystem).gameObject;
-            instance.transform.position = transform.position;
+            //GameObject instance = Instantiate(deathParticleSystem).gameObject;
+            //instance.transform.position = transform.position;
 
             Score score = GetComponent<Score>();
             if(score) {
                 bulletOwner.CmdAddScore(GetComponent<Score>().transform.position, score.score);
             }
 
-            NetworkServer.Destroy(gameObject);
+            if(!isClient && isServer) {
+                NetworkServer.Destroy(gameObject);
+            }
         }
     }
 
@@ -240,5 +242,9 @@ public class EnemyController : NetworkBehaviour {
     void RpcDeath() {
         GameObject instance = Instantiate(deathParticleSystem).gameObject;
         instance.transform.position = transform.position;
+
+        if (isServer) {
+            NetworkServer.Destroy(gameObject);
+        }
     }
 }

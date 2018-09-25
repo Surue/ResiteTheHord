@@ -4,7 +4,25 @@ using UnityEngine.Networking;
 using Random = UnityEngine.Random;
 
 public class PlayerController : NetworkBehaviour {
+    #region Transform interpolation
+    public struct NetworkedTransform {
+        public float posX;
+        public float posY;
+        public float rotation;
 
+        public Vector3 GetPosition() {
+            return new Vector3(posX, posY, 0);
+        }
+
+        public Vector3 GetRotationEulerAngle() {
+            return new Vector3(0, 0, rotation);
+        }
+    }
+
+    NetworkedTransform nextNetworkedTransform;
+    #endregion
+
+    #region Variables
     //Visual
     [SyncVar(hook = "OnColorChanged")] Color color = Color.black;
 
@@ -27,9 +45,10 @@ public class PlayerController : NetworkBehaviour {
     int score = 0;
     [SyncVar]
     string username = "";
+    #endregion
 
-	//Use this for initialization
-	void Start () {
+    //Use this for initialization
+    void Start () {
 	    GetComponentInChildren<SpriteRenderer>().color = color;
 
 	    if (isLocalPlayer) {
@@ -49,6 +68,26 @@ public class PlayerController : NetworkBehaviour {
         movement = new Vector3(movement.x * speed, movement.y * speed);
 
         body.velocity = movement;
+
+        CmdSetTransform(GetCurrentNetworkedTransform());
+    }
+
+    public NetworkedTransform GetCurrentNetworkedTransform() {
+        return new NetworkedTransform {
+            rotation = transform.eulerAngles.z,
+            posX = transform.position.x,
+            posY = transform.position.y
+        };
+    }
+
+    [Command]
+    public void CmdSetTransform(NetworkedTransform networkedTransform) {
+        RpcSetTransform(networkedTransform);
+    }
+
+    [ClientRpc]
+    public void RpcSetTransform(NetworkedTransform networkedTransform) {
+        nextNetworkedTransform = networkedTransform;
     }
 
     [Command]
@@ -68,6 +107,9 @@ public class PlayerController : NetworkBehaviour {
     // Update is called once per frame
     void Update () {
 	    if (!isLocalPlayer) {
+	        transform.eulerAngles = Vector3.Lerp(transform.eulerAngles, nextNetworkedTransform.GetRotationEulerAngle(), Time.deltaTime * speed);
+	        transform.position = Vector2.Lerp(GetCurrentNetworkedTransform().GetPosition(), nextNetworkedTransform.GetPosition(), Time.deltaTime * speed);
+
 	        return;
 	    }
 
@@ -86,6 +128,10 @@ public class PlayerController : NetworkBehaviour {
 	        CmdFire(bulletSpawn.position, bulletSpawn.rotation);
 	    }
 
+        if (Input.GetKeyDown(KeyCode.Space)) {
+            Time.timeScale = 0.5f;
+        }
+
 	    timeSinceLastFire -= Time.deltaTime;
 	}
 
@@ -96,6 +142,8 @@ public class PlayerController : NetworkBehaviour {
         bullet.transform.position += Random.Range(-0.1f, 0.1f) * bulletSpawn.right;
 
         bullet.GetComponentInChildren<Rigidbody2D>().velocity = bullet.transform.up * bulletSpeed;
+
+        bullet.transform.position += (Vector3)bullet.GetComponentInChildren<Rigidbody2D>().velocity * Time.deltaTime;
 
         bullet.GetComponent<Bullet>().Initialize(this);
 
