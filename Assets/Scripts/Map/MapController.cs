@@ -8,8 +8,6 @@ public class MapController:MonoBehaviour {
     [HideInInspector]
     public MapTile[,] tiles;
 
-    PlayerController player;
-
 
     [SerializeField]
     Tilemap solidTilemap;
@@ -18,8 +16,6 @@ public class MapController:MonoBehaviour {
 
     // Use this for initialization
     void Start() {
-        player = FindObjectOfType<PlayerController>();
-
         SetTiles();
     }
 
@@ -72,8 +68,6 @@ public class MapController:MonoBehaviour {
 
     void UpdateTile(MapTile t) {
         FindObjectOfType<NavigationAI>().GenerateNavigationGraph(tiles, new Vector2Int(Mathf.Abs(solidTilemap.cellBounds.x), Mathf.Abs(solidTilemap.cellBounds.y)));
-
-        BoundsInt bounds = new BoundsInt(-1, -1, 0, 3, 3, 1);
     }
     
     Vector2Int Transform2TilePos(Transform pos) {

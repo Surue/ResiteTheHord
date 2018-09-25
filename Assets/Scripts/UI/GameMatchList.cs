@@ -9,8 +9,6 @@ public class GameMatchList : MonoBehaviour {
     [SerializeField]
     JoinPanel joinPanelPrefab;
 
-    List<LanConnectionInfo> lanAdresses = new List<LanConnectionInfo>();
-
     void Start() {
         AvailableMatchesList.OnAvailableMatchesChanged += AvailableMatchesList_OnAvailableMatchesChanged;
         AvailableMatchesList.OnAvailableLanChanged += AvailableMatchesList_OnAvailableLanChanged;

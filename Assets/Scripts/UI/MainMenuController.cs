@@ -32,4 +32,12 @@ public class MainMenuController : MonoBehaviour {
     public void StartMatch() {
         FindObjectOfType<CustomNetworkManager>().StartHosting();
     }
+
+    public void Shutdown() {
+        CustomNetworkManager customNetworkManager = FindObjectOfType<CustomNetworkManager>();
+        Destroy(customNetworkManager.gameObject);
+        CustomNetworkManager.Shutdown();
+
+        LoadSceneByName("MainMenu");
+    }
 }
