@@ -83,15 +83,15 @@ public class PlayerController : NetworkBehaviour {
 
         if (Input.GetButton("Fire1") && timeSinceLastFire <= 0) {
             timeSinceLastFire = timeBetweenFire;
-	        CmdFire();
+	        CmdFire(bulletSpawn.position, bulletSpawn.rotation);
 	    }
 
 	    timeSinceLastFire -= Time.deltaTime;
 	}
 
     [Command]
-    void CmdFire() {
-        GameObject bullet = Instantiate(bulletPrefab, bulletSpawn.position, bulletSpawn.rotation);
+    void CmdFire(Vector3 pos, Quaternion rot) {
+        GameObject bullet = Instantiate(bulletPrefab, pos, rot);
 
         bullet.transform.position += Random.Range(-0.1f, 0.1f) * bulletSpawn.right;
 
