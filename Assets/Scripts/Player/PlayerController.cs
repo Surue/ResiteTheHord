@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.XR.WSA;
 using Debug = UnityEngine.Debug;
 using Random = UnityEngine.Random;
 
@@ -23,6 +24,12 @@ public class PlayerController : NetworkBehaviour {
     }
 
     NetworkedTransform nextNetworkedTransform;
+    #endregion
+
+    #region Transform extrapolation
+
+    Vector3[] lastPositions = new Vector3[10];
+
     #endregion
 
     #region Variables
@@ -64,6 +71,10 @@ public class PlayerController : NetworkBehaviour {
 	    }
 
 	    body = GetComponent<Rigidbody2D>();
+
+        for (int i = 0; i < 10; i++) {
+            lastPositions[i] = transform.position;
+        }
 	}
 
     void FixedUpdate() {
@@ -94,6 +105,16 @@ public class PlayerController : NetworkBehaviour {
     [ClientRpc]
     public void RpcSetTransform(NetworkedTransform networkedTransform) {
         nextNetworkedTransform = networkedTransform;
+        Vector3[] tmpLastPosition = new Vector3[10];
+        for (int i = 0; i < 10; i++) {
+            tmpLastPosition[i] = lastPositions[i];
+        }
+
+        lastPositions[0] = networkedTransform.GetPosition();
+
+        for (int i = 0; i < 9; i++) {
+            lastPositions[i + 1] = tmpLastPosition[i];
+        }
     }
 
     [Command]
@@ -111,8 +132,28 @@ public class PlayerController : NetworkBehaviour {
         GetComponentInChildren<SpriteRenderer>().color = c;
     }
 
+    Vector3 ComputeExtrapolatedPosition() {
+        Vector3[] vectorTranslation = new Vector3[9];
+        for(int i = 0;i < 9;i++) {
+            vectorTranslation[i] = lastPositions[i] - lastPositions[i + 1];
+        }
+
+        Vector3 averageTranslation = Vector3.zero;
+        Debug.Log("=============");
+        for (int i = 0; i < 9; i++) {
+            averageTranslation += vectorTranslation[i];
+            Debug.Log(vectorTranslation[i]);
+        }
+
+        Debug.Log(averageTranslation);
+
+        return new Vector3(averageTranslation.x / 9f, averageTranslation.y / 9f, 0);
+    }
+
     // Update is called once per frame
     void Update () {
+        Vector3 offsetExtrapolation = ComputeExtrapolatedPosition() + transform.position;
+
         if (!isLocalPlayer && isClient) {
 	        transform.eulerAngles = nextNetworkedTransform.GetRotationEulerAngle();
 	        transform.position = Vector2.Lerp(transform.position, nextNetworkedTransform.GetPosition(), Time.deltaTime * speed);
@@ -130,13 +171,18 @@ public class PlayerController : NetworkBehaviour {
 
         Vector3 offsetInterpolation = nextNetworkedTransform.GetPosition();
 
-        Debug.DrawLine(offsetInterpolation + topLeft, offsetInterpolation + topRight);
-        Debug.DrawLine(offsetInterpolation + topRight, offsetInterpolation + bottomRight);
-        Debug.DrawLine(offsetInterpolation + bottomRight, offsetInterpolation + bottomLeft);
-        Debug.DrawLine(offsetInterpolation + bottomLeft, offsetInterpolation + topLeft);
+        Debug.DrawLine(offsetInterpolation + topLeft, offsetInterpolation + topRight, Color.blue);
+        Debug.DrawLine(offsetInterpolation + topRight, offsetInterpolation + bottomRight, Color.blue);
+        Debug.DrawLine(offsetInterpolation + bottomRight, offsetInterpolation + bottomLeft, Color.blue);
+        Debug.DrawLine(offsetInterpolation + bottomLeft, offsetInterpolation + topLeft, Color.blue);
+        
+        Debug.DrawLine(offsetExtrapolation + topLeft, offsetExtrapolation + topRight, Color.red);
+        Debug.DrawLine(offsetExtrapolation + topRight, offsetExtrapolation + bottomRight, Color.red);
+        Debug.DrawLine(offsetExtrapolation + bottomRight, offsetExtrapolation + bottomLeft, Color.red);
+        Debug.DrawLine(offsetExtrapolation + bottomLeft, offsetExtrapolation + topLeft, Color.red);
 
         //Movement
-	    float x = Input.GetAxis("Horizontal");
+        float x = Input.GetAxis("Horizontal");
 	    float y = Input.GetAxis("Vertical");
         
         movement = new Vector3(x, y);
