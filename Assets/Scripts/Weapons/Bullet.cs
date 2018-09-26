@@ -39,6 +39,8 @@ public class Bullet : NetworkBehaviour {
     }
 
     void OnColorChanged(Color c) {
+        bulletColor = c;
+
         sprite.color = c;
         spriteLight.color = c;
         trail.startColor = c;
@@ -66,12 +68,6 @@ public class Bullet : NetworkBehaviour {
 
         RpcDestroy(transform.position);
 
-        //GameObject instance = Instantiate(explosionParticle).gameObject;
-        //instance.transform.position = (Vector2)transform.position - GetComponent<Rigidbody2D>().velocity * 0.01f;
-
-        //ParticleSystem.MainModule main = instance.GetComponent<ParticleSystem>().main;
-        //main.startColor = bulletColor;
-
         if(!isClient && isServer) {
             NetworkServer.Destroy(gameObject);
         }
@@ -96,6 +92,6 @@ public class Bullet : NetworkBehaviour {
     [ClientRpc]
     public void RpcCompensatePosition(float time, Vector2 vel) {
         GetComponent<Rigidbody2D>().velocity = vel;
-        transform.Translate(vel * (time / 2000f + CustomNetworkManager.singleton.client.GetRTT() / 2000f));
+        transform.position += (Vector3)(vel * (time / 2000f + CustomNetworkManager.singleton.client.GetRTT() / 2000f));
     }
 }

@@ -267,6 +267,8 @@ MonoBehaviour:
   bulletSpawn: {fileID: 4186144743619628}
   timeBetweenFire: 0.15
   bulletSpeed: 10
+  ghostBulletPrefab: {fileID: 1050712595730650, guid: f117c8ef8809dc541bb5e4468b808d3b,
+    type: 2}
   speed: 4
 --- !u!114 &114340098452227326
 MonoBehaviour:

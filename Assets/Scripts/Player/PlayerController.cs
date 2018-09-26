@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -36,6 +37,9 @@ public class PlayerController : NetworkBehaviour {
     float timeSinceLastFire = 0;
     [SerializeField] float bulletSpeed = 10;
 
+    public GameObject ghostBulletPrefab;
+    List<GameObject> ghostsBullet = new List<GameObject>();
+
     //Movement
     [Header("Movement")]
     Rigidbody2D body;
@@ -47,9 +51,6 @@ public class PlayerController : NetworkBehaviour {
     int score = 0;
     [SyncVar]
     string username = "";
-
-    //Time
-    float timer = 0;
     #endregion
 
     //Use this for initialization
@@ -66,8 +67,6 @@ public class PlayerController : NetworkBehaviour {
 	}
 
     void FixedUpdate() {
-        timer += Time.fixedDeltaTime;
-
         if (!isLocalPlayer) {
             return;
         }
@@ -108,22 +107,33 @@ public class PlayerController : NetworkBehaviour {
     }
 
     void OnColorChanged(Color c) {
+        color = c;
         GetComponentInChildren<SpriteRenderer>().color = c;
     }
 
     // Update is called once per frame
     void Update () {
-
-	    if (!isLocalPlayer && isClient) {
+        if (!isLocalPlayer && isClient) {
 	        transform.eulerAngles = nextNetworkedTransform.GetRotationEulerAngle();
-	        transform.position = Vector2.Lerp(transform.position, nextNetworkedTransform.GetPosition(), Time.deltaTime * speed * 20);
-
+	        transform.position = Vector2.Lerp(transform.position, nextNetworkedTransform.GetPosition(), Time.deltaTime * speed);
 	        return;
 	    }
 
         if (!isLocalPlayer && isServer) {
             return;
-        }
+        } 
+
+        Vector3 topLeft = new Vector2(-0.5f,0.5f);
+        Vector3 topRight = new Vector2(0.5f,0.5f);
+        Vector3 bottomLeft = new Vector2(-0.5f,-0.5f);
+        Vector3 bottomRight = new Vector2(0.5f,-0.5f);
+
+        Vector3 offsetInterpolation = nextNetworkedTransform.GetPosition();
+
+        Debug.DrawLine(offsetInterpolation + topLeft, offsetInterpolation + topRight);
+        Debug.DrawLine(offsetInterpolation + topRight, offsetInterpolation + bottomRight);
+        Debug.DrawLine(offsetInterpolation + bottomRight, offsetInterpolation + bottomLeft);
+        Debug.DrawLine(offsetInterpolation + bottomLeft, offsetInterpolation + topLeft);
 
         //Movement
 	    float x = Input.GetAxis("Horizontal");
@@ -137,7 +147,11 @@ public class PlayerController : NetworkBehaviour {
 
         if (Input.GetButton("Fire1") && timeSinceLastFire <= 0) {
             timeSinceLastFire = timeBetweenFire;
-	        CmdFire(bulletSpawn.position, bulletSpawn.rotation, CustomNetworkManager.singleton.client.GetRTT());
+
+            Vector3 offset = Random.Range(-0.1f, 0.1f) * bulletSpawn.right;
+
+            CmdFire(bulletSpawn.position + offset, bulletSpawn.rotation, CustomNetworkManager.singleton.client.GetRTT(), GetComponent<NetworkIdentity>());
+            SpawnGhost(bulletSpawn.position + offset, bulletSpawn.rotation);
 	    }
 
         if (Input.GetKeyDown(KeyCode.Space)) {
@@ -147,11 +161,20 @@ public class PlayerController : NetworkBehaviour {
 	    timeSinceLastFire -= Time.deltaTime;
 	}
 
-    [Command]
-    void CmdFire(Vector3 pos, Quaternion rot, float time) {
-        GameObject bullet = Instantiate(bulletPrefab, pos, rot);
+    void SpawnGhost(Vector3 pos, Quaternion rot) {
+        GameObject bullet = Instantiate(ghostBulletPrefab, pos, rot);
 
-        bullet.transform.position += Random.Range(-0.1f, 0.1f) * bulletSpawn.right; //Lateral offset        
+        Vector2 vel = bullet.transform.up * bulletSpeed; //Compute velocity
+        bullet.GetComponentInChildren<Rigidbody2D>().velocity = vel; //Add velocity
+
+        ghostsBullet.Add(bullet);
+
+        bullet.GetComponent<BulletGhost>().Initialize(this);
+    }
+
+    [Command]
+    void CmdFire(Vector3 pos, Quaternion rot, float time, NetworkIdentity id) {
+        GameObject bullet = Instantiate(bulletPrefab, pos, rot);    
 
         Vector2 vel = bullet.transform.up * bulletSpeed; //Compute velocity
 
@@ -167,6 +190,14 @@ public class PlayerController : NetworkBehaviour {
         bullet.transform.position += ((Vector3)vel * (time / 2000f)); //Compensate position on server
 
         Destroy(bullet, 2f);
+
+        TargetDestroyGhostBullet(id.connectionToClient);
+    }
+
+    [TargetRpc]
+    public void TargetDestroyGhostBullet(NetworkConnection conn) {
+        Destroy(ghostsBullet[0]);
+        ghostsBullet.RemoveAt(0);
     }
 
     [Command]
@@ -177,7 +208,7 @@ public class PlayerController : NetworkBehaviour {
     }
 
     public override void OnStartLocalPlayer() {
-        GetComponentInChildren<SpriteRenderer>().color = Color.blue;
+        
     }
 
     [Command]

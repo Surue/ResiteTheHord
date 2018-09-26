@@ -222,7 +222,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 238.40002, y: -60.3}
+  m_AnchoredPosition: {x: 238.40039, y: -60.3}
   m_SizeDelta: {x: 476.19995, y: 120.6}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &285943392
@@ -881,7 +881,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 238.30005, y: -179.6}
+  m_AnchoredPosition: {x: 238.30078, y: -179.6}
   m_SizeDelta: {x: 476, y: 117.2}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1122265694
@@ -1066,7 +1066,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -238.40002, y: -60.3}
+  m_AnchoredPosition: {x: -238.40039, y: -60.3}
   m_SizeDelta: {x: 476.19995, y: 120.6}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1408827121
@@ -1278,6 +1278,11 @@ Prefab:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 114450123715630890, guid: 6896a4867ce7a2a479edb4980ff11579,
+        type: 2}
+      propertyPath: m_Channels.Array.size
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 4247927079184186, guid: 6896a4867ce7a2a479edb4980ff11579, type: 2}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1323,6 +1328,26 @@ Prefab:
         type: 2}
       propertyPath: m_LogLevel
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114450123715630890, guid: 6896a4867ce7a2a479edb4980ff11579,
+        type: 2}
+      propertyPath: m_Channels.Array.data[0]
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 114450123715630890, guid: 6896a4867ce7a2a479edb4980ff11579,
+        type: 2}
+      propertyPath: m_CustomConfig
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114450123715630890, guid: 6896a4867ce7a2a479edb4980ff11579,
+        type: 2}
+      propertyPath: m_UseSimulator
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114450123715630890, guid: 6896a4867ce7a2a479edb4980ff11579,
+        type: 2}
+      propertyPath: m_SimulatedLatency
+      value: 50
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6896a4867ce7a2a479edb4980ff11579, type: 2}
