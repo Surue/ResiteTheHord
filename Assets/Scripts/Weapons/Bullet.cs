@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Experimental.UIElements;
 using UnityEngine.Networking;
 
 public class Bullet : NetworkBehaviour {
@@ -62,34 +64,24 @@ public class Bullet : NetworkBehaviour {
             enemy.TakeDamage(1, owner);
         }
 
-        RpcDestroy();
+        RpcDestroy(transform.position);
 
-        GameObject instance = Instantiate(explosionParticle).gameObject;
-        instance.transform.position = (Vector2)transform.position - GetComponent<Rigidbody2D>().velocity * 0.01f;
+        //GameObject instance = Instantiate(explosionParticle).gameObject;
+        //instance.transform.position = (Vector2)transform.position - GetComponent<Rigidbody2D>().velocity * 0.01f;
 
-        ParticleSystem.MainModule main = instance.GetComponent<ParticleSystem>().main;
-        main.startColor = bulletColor;
+        //ParticleSystem.MainModule main = instance.GetComponent<ParticleSystem>().main;
+        //main.startColor = bulletColor;
 
         if(!isClient && isServer) {
             NetworkServer.Destroy(gameObject);
         }
     }
 
-    //[ClientRpc]
-    //void RpcInsantiateExplosionParticles() {
-    //    GameObject instance = Instantiate(explosionParticle).gameObject;
-    //    instance.transform.position = (Vector2)transform.position - GetComponent<Rigidbody2D>().velocity * 0.04f;
-
-    //    ParticleSystem.MainModule main = instance.GetComponent<ParticleSystem>().main;
-    //    main.startColor = bulletColor;
-
-    //    Destroy(instance, 0.3f);
-    //}
-
     [ClientRpc]
-    void RpcDestroy() {
+    void RpcDestroy(Vector2 pos) {
+        transform.position = pos;
         GameObject instance = Instantiate(explosionParticle).gameObject;
-        instance.transform.position = (Vector2)transform.position - GetComponent<Rigidbody2D>().velocity * 0.04f;
+        instance.transform.position = (Vector2)transform.position - GetComponent<Rigidbody2D>().velocity.normalized * 0.04f;
 
         ParticleSystem.MainModule main = instance.GetComponent<ParticleSystem>().main;
         main.startColor = bulletColor;
@@ -99,5 +91,11 @@ public class Bullet : NetworkBehaviour {
         if(isServer) {
             NetworkServer.Destroy(gameObject);
         }
+    }
+
+    [ClientRpc]
+    public void RpcCompensatePosition(float time, Vector2 vel) {
+        GetComponent<Rigidbody2D>().velocity = vel;
+        transform.Translate(vel * (time / 2000f + CustomNetworkManager.singleton.client.GetRTT() / 2000f));
     }
 }

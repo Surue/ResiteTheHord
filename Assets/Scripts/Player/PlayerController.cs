@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.Networking;
+using Debug = UnityEngine.Debug;
 using Random = UnityEngine.Random;
 
 public class PlayerController : NetworkBehaviour {
@@ -45,6 +47,9 @@ public class PlayerController : NetworkBehaviour {
     int score = 0;
     [SyncVar]
     string username = "";
+
+    //Time
+    float timer = 0;
     #endregion
 
     //Use this for initialization
@@ -61,6 +66,8 @@ public class PlayerController : NetworkBehaviour {
 	}
 
     void FixedUpdate() {
+        timer += Time.fixedDeltaTime;
+
         if (!isLocalPlayer) {
             return;
         }
@@ -106,12 +113,17 @@ public class PlayerController : NetworkBehaviour {
 
     // Update is called once per frame
     void Update () {
-	    if (!isLocalPlayer) {
+
+	    if (!isLocalPlayer && isClient) {
 	        transform.eulerAngles = Vector3.Lerp(transform.eulerAngles, nextNetworkedTransform.GetRotationEulerAngle(), Time.deltaTime * speed);
-	        transform.position = Vector2.Lerp(GetCurrentNetworkedTransform().GetPosition(), nextNetworkedTransform.GetPosition(), Time.deltaTime * speed);
+	        transform.position = Vector2.Lerp(transform.position, nextNetworkedTransform.GetPosition(), Time.deltaTime * speed);
 
 	        return;
 	    }
+
+        if (!isLocalPlayer && isServer) {
+            return;
+        }
 
         //Movement
 	    float x = Input.GetAxis("Horizontal");
@@ -125,7 +137,7 @@ public class PlayerController : NetworkBehaviour {
 
         if (Input.GetButton("Fire1") && timeSinceLastFire <= 0) {
             timeSinceLastFire = timeBetweenFire;
-	        CmdFire(bulletSpawn.position, bulletSpawn.rotation);
+	        CmdFire(bulletSpawn.position, bulletSpawn.rotation, CustomNetworkManager.singleton.client.GetRTT());
 	    }
 
         if (Input.GetKeyDown(KeyCode.Space)) {
@@ -136,18 +148,23 @@ public class PlayerController : NetworkBehaviour {
 	}
 
     [Command]
-    void CmdFire(Vector3 pos, Quaternion rot) {
+    void CmdFire(Vector3 pos, Quaternion rot, float time) {
         GameObject bullet = Instantiate(bulletPrefab, pos, rot);
 
-        bullet.transform.position += Random.Range(-0.1f, 0.1f) * bulletSpawn.right;
+        bullet.transform.position += Random.Range(-0.1f, 0.1f) * bulletSpawn.right; //Lateral offset        
 
-        bullet.GetComponentInChildren<Rigidbody2D>().velocity = bullet.transform.up * bulletSpeed;
+        Vector2 vel = bullet.transform.up * bulletSpeed;
 
-        bullet.transform.position += (Vector3)bullet.GetComponentInChildren<Rigidbody2D>().velocity * Time.deltaTime;
+        bullet.GetComponentInChildren<Rigidbody2D>().velocity = vel; //Add velocity
 
         bullet.GetComponent<Bullet>().Initialize(this);
 
         NetworkServer.Spawn(bullet);
+
+        bullet.GetComponent<Bullet>().RpcCompensatePosition(time, vel);
+
+        //Compensate position on server
+        bullet.transform.position += ((Vector3)vel * (time / 2000f));
 
         Destroy(bullet, 2f);
     }
