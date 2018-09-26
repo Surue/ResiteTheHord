@@ -115,8 +115,8 @@ public class PlayerController : NetworkBehaviour {
     void Update () {
 
 	    if (!isLocalPlayer && isClient) {
-	        transform.eulerAngles = Vector3.Lerp(transform.eulerAngles, nextNetworkedTransform.GetRotationEulerAngle(), Time.deltaTime * speed);
-	        transform.position = Vector2.Lerp(transform.position, nextNetworkedTransform.GetPosition(), Time.deltaTime * speed);
+	        transform.eulerAngles = nextNetworkedTransform.GetRotationEulerAngle();
+	        transform.position = Vector2.Lerp(transform.position, nextNetworkedTransform.GetPosition(), Time.deltaTime * speed * 20);
 
 	        return;
 	    }
@@ -153,18 +153,18 @@ public class PlayerController : NetworkBehaviour {
 
         bullet.transform.position += Random.Range(-0.1f, 0.1f) * bulletSpawn.right; //Lateral offset        
 
-        Vector2 vel = bullet.transform.up * bulletSpeed;
+        Vector2 vel = bullet.transform.up * bulletSpeed; //Compute velocity
 
         bullet.GetComponentInChildren<Rigidbody2D>().velocity = vel; //Add velocity
 
-        bullet.GetComponent<Bullet>().Initialize(this);
+        bullet.GetComponent<Bullet>().Initialize(this); //Setup color information
 
         NetworkServer.Spawn(bullet);
 
-        bullet.GetComponent<Bullet>().RpcCompensatePosition(time, vel);
+        bullet.GetComponent<Bullet>().RpcCompensatePosition(time, vel); //Compensate position on client
 
         //Compensate position on server
-        bullet.transform.position += ((Vector3)vel * (time / 2000f));
+        bullet.transform.position += ((Vector3)vel * (time / 2000f)); //Compensate position on server
 
         Destroy(bullet, 2f);
     }
