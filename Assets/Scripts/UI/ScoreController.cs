@@ -29,5 +29,7 @@ public class ScoreController : NetworkBehaviour {
         instance.transform.position = pos;
 
         instance.GetComponentInChildren<TextMeshProUGUI>().text = "+" + score.ToString();
+
+        Destroy(instance, 2f);
     }
 }

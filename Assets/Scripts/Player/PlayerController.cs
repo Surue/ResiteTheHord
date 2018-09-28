@@ -290,12 +290,29 @@ public class PlayerController : NetworkBehaviour {
         bullet.GetComponent<Bullet>().RpcCompensatePosition(time, vel); //Compensate position on client
 
         //Compensate position on server
-        bullet.transform.position += ((Vector3)vel * (time / 2000f)); //Compensate position on server
+        bullet.transform.position += ((Vector3)vel * (time / 2000f)); //Compensate position on server with no-collision
+        
+        LayerMask layerMask = ~((1 << LayerMask.NameToLayer("Bullet")) | (1 << LayerMask.NameToLayer("Player")));
 
-        Destroy(bullet, 2f);
+        RaycastHit2D hit = Physics2D.Raycast(pos, bullet.transform.up, Vector2.Distance(pos, bullet.transform.position) + 0.2f, layerMask);
+        
+        if (hit) {
+            RpcDebug("hit => " + hit.collider.name);
 
-        TargetDestroyGhostBullet(id.connectionToClient);
-        RpcSpawnGhostBullet(bullet);
+            Destroy(bullet);
+        } else {
+            NetworkServer.Spawn(bullet);
+
+            TargetDestroyGhostBullet(id.connectionToClient);
+            RpcSpawnGhostBullet(bullet);
+
+            Destroy(bullet, 2f);
+        }
+    }
+
+    [ClientRpc]
+    void RpcDebug(string s) {
+        Debug.Log(s);
     }
 
     [ClientRpc]

@@ -22,7 +22,7 @@ GameObject:
   - component: {fileID: 114249352004980050}
   - component: {fileID: 50236305176010656}
   - component: {fileID: 114756795053225750}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: BulletGhost
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -39,7 +39,7 @@ GameObject:
   - component: {fileID: 4838241868899808}
   - component: {fileID: 212815252324187988}
   - component: {fileID: 96049963137237454}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: bullet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -56,7 +56,7 @@ GameObject:
   - component: {fileID: 4100168839882888}
   - component: {fileID: 212723032439173986}
   - component: {fileID: 95410435735561632}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: glowEffect
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -27,6 +27,10 @@ public class Bullet : NetworkBehaviour {
         trail.endColor = bulletColor;
     }
 
+    void OnDrawGizmos() {
+        Gizmos.DrawSphere(transform.position, 1 * transform.localScale.x);
+    }
+
     public void Initialize(PlayerController id) {
         owner = id;
 

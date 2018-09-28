@@ -22,7 +22,7 @@ GameObject:
   - component: {fileID: 114282670944612366}
   - component: {fileID: 114746198258285858}
   - component: {fileID: 50741405630898642}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Bullet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -40,7 +40,7 @@ GameObject:
   - component: {fileID: 212941696236191730}
   - component: {fileID: 58580934449014054}
   - component: {fileID: 96377840605539684}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: bullet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -57,7 +57,7 @@ GameObject:
   - component: {fileID: 4355771345123238}
   - component: {fileID: 212394629738230250}
   - component: {fileID: 95389729057174158}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: glowEffect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
