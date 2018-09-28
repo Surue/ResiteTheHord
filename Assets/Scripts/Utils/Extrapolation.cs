@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-public class Extrapolation : MonoBehaviour{
+public class Extrapolation : MonoBehaviour {
 
     public static float InterpolateX(float[] t, float[] y, float x) {
         float answer = 0;

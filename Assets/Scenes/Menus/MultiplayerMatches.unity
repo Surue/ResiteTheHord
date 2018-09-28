@@ -1347,7 +1347,7 @@ Prefab:
     - target: {fileID: 114450123715630890, guid: 6896a4867ce7a2a479edb4980ff11579,
         type: 2}
       propertyPath: m_SimulatedLatency
-      value: 20
+      value: 50
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6896a4867ce7a2a479edb4980ff11579, type: 2}

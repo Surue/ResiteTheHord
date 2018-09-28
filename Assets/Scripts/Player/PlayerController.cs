@@ -111,6 +111,7 @@ public class PlayerController : NetworkBehaviour {
     [ClientRpc]
     public void RpcSetTransform(NetworkedTransform networkedTransform, float time) {
 
+        nextNetworkedTransform = networkedTransform;
 
         extrapolatedPosition = networkedTransform.GetPosition();
         return;
@@ -214,7 +215,7 @@ public class PlayerController : NetworkBehaviour {
 
         if (!isLocalPlayer && isClient) {
 	        transform.eulerAngles = nextNetworkedTransform.GetRotationEulerAngle();
-	        transform.position = Vector2.Lerp(transform.position, offsetExtrapolation, Time.deltaTime * speed * 2);
+	        transform.position = Vector2.Lerp(transform.position, offsetExtrapolation, Time.deltaTime * speed);
 	        return;
 	    }
 
@@ -263,15 +264,15 @@ public class PlayerController : NetworkBehaviour {
 	    timeSinceLastFire -= Time.deltaTime;
 	}
 
-    void SpawnGhost(Vector3 pos, Quaternion rot) {
+    void SpawnGhost(Vector3 pos, Quaternion rot, GameObject target = null) {
         GameObject bullet = Instantiate(ghostBulletPrefab, pos, rot);
 
         Vector2 vel = bullet.transform.up * bulletSpeed; //Compute velocity
-        bullet.GetComponentInChildren<Rigidbody2D>().velocity = vel; //Add velocity
+        bullet.GetComponent<Rigidbody2D>().velocity = vel; //Add velocity
 
         ghostsBullet.Add(bullet);
-
-        bullet.GetComponent<BulletGhost>().Initialize(this);
+        
+        bullet.GetComponent<BulletGhost>().Initialize(this, target);
     }
 
     [Command]
@@ -294,11 +295,19 @@ public class PlayerController : NetworkBehaviour {
         Destroy(bullet, 2f);
 
         TargetDestroyGhostBullet(id.connectionToClient);
+        RpcSpawnGhostBullet(bullet);
+    }
+
+    [ClientRpc]
+    public void RpcSpawnGhostBullet(GameObject bullet) {
+        if (!isLocalPlayer) {
+            SpawnGhost(bulletSpawn.position, bulletSpawn.rotation, bullet);
+        }
     }
 
     [TargetRpc]
     public void TargetDestroyGhostBullet(NetworkConnection conn) {
-        Destroy(ghostsBullet[0]);
+        Destroy(ghostsBullet[0], 0.1f);
         ghostsBullet.RemoveAt(0);
     }
 

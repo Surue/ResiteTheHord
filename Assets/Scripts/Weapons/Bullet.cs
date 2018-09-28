@@ -94,4 +94,20 @@ public class Bullet : NetworkBehaviour {
         GetComponent<Rigidbody2D>().velocity = vel;
         transform.position += (Vector3)(vel * (time / 2000f + CustomNetworkManager.singleton.client.GetRTT() / 2000f));
     }
+
+    public PlayerController GetOwner() {
+        return owner;
+    }
+
+    public void Hide() {
+        sprite.gameObject.SetActive(false);
+
+        trail.gameObject.SetActive(false);
+    }
+
+    public void Show() {
+        sprite.gameObject.SetActive(true);
+
+        trail.gameObject.SetActive(true);
+    }
 }

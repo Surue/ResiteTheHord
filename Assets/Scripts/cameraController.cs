@@ -14,7 +14,8 @@ public class cameraController : MonoBehaviour {
 	// Update is called once per frame
 	void LateUpdate () {
 	    if (focusedObject) {
-            transform.position = Vector2.Lerp(transform.position, focusedObject.transform.up * 3 + focusedObject.transform.position, Time.deltaTime * 6.5f);
+            //Default value = 3
+            transform.position = Vector2.Lerp(transform.position, focusedObject.transform.up * 1 + focusedObject.transform.position, Time.deltaTime * 6.5f);
             transform.position = new Vector3(transform.position.x, transform.position.y, -10);
         }
 	}
