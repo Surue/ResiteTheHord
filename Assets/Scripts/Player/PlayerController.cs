@@ -29,6 +29,8 @@ public class PlayerController : NetworkBehaviour {
     #region Transform extrapolation
 
     Vector3[] lastPositions = new Vector3[10];
+    float[] lastPositionsTimes = new float[10];
+    Vector3 extrapolatedPosition = new Vector3();
 
     #endregion
 
@@ -66,8 +68,12 @@ public class PlayerController : NetworkBehaviour {
 
 	    if (isLocalPlayer) {
 	        FindObjectOfType<cameraController>().focusedObject = gameObject;
-	        CmdSetColor(FindObjectOfType<PlayerInfoController>().GetColor());
-            CmdSetName(FindObjectOfType<PlayerInfoController>().GetName());
+
+	        PlayerInfoController tmp = FindObjectOfType<PlayerInfoController>();
+	        if (tmp) {
+	            CmdSetColor(tmp.GetColor());
+	            CmdSetName(tmp.GetName());
+            }
 	    }
 
 	    body = GetComponent<Rigidbody2D>();
@@ -86,7 +92,7 @@ public class PlayerController : NetworkBehaviour {
 
         body.velocity = movement;
 
-        CmdSetTransform(GetCurrentNetworkedTransform());
+        CmdSetTransform(GetCurrentNetworkedTransform(), CustomNetworkManager.singleton.client.GetRTT());
     }
 
     public NetworkedTransform GetCurrentNetworkedTransform() {
@@ -98,13 +104,23 @@ public class PlayerController : NetworkBehaviour {
     }
 
     [Command]
-    public void CmdSetTransform(NetworkedTransform networkedTransform) {
-        RpcSetTransform(networkedTransform);
+    public void CmdSetTransform(NetworkedTransform networkedTransform, float time) {
+        RpcSetTransform(networkedTransform, time);
     }
 
     [ClientRpc]
-    public void RpcSetTransform(NetworkedTransform networkedTransform) {
+    public void RpcSetTransform(NetworkedTransform networkedTransform, float time) {
+
+
+        extrapolatedPosition = networkedTransform.GetPosition();
+        return;
+
+        if (Time.time == lastPositionsTimes[0]) {
+            return;
+        }
         nextNetworkedTransform = networkedTransform;
+
+        //Extrapolation
         Vector3[] tmpLastPosition = new Vector3[10];
         for (int i = 0; i < 10; i++) {
             tmpLastPosition[i] = lastPositions[i];
@@ -115,6 +131,65 @@ public class PlayerController : NetworkBehaviour {
         for (int i = 0; i < 9; i++) {
             lastPositions[i + 1] = tmpLastPosition[i];
         }
+
+        //Time 
+        float[] tmpLastPositionTimes = new float[10];
+        for(int i = 0;i < 10;i++) {
+            tmpLastPositionTimes[i] = lastPositionsTimes[i];
+        }
+
+        lastPositionsTimes[0] = Time.time;
+
+        for(int i = 0;i < 9;i++) {
+            lastPositionsTimes[i + 1] = tmpLastPositionTimes[i];
+        }
+
+        //Compute extrapolatedPosition
+        int limit = 3;
+        float[] t = new float[limit];
+        for(int i = 0;i < limit;i++) {
+            t[i] = lastPositionsTimes[i];
+        }
+
+
+        float[] x = new float[limit];
+        for (int i = 0; i < limit; i++) {
+            x[i] = lastPositions[i].x;
+        }
+
+        float[] y = new float[limit];
+        for(int i = 0;i < limit;i++) {
+            y[i] = lastPositions[i].y;
+        }
+
+        Vector2[] controlsPointX = new Vector2[limit];
+        for (int i = 0; i < limit; i++) {
+            controlsPointX[i] = new Vector2(lastPositionsTimes[i], lastPositions[i].x);
+        }
+
+        Vector2[] controlsPointY = new Vector2[limit];
+        for(int i = 0;i < limit;i++) {
+            controlsPointY[i] = new Vector2(lastPositionsTimes[i], lastPositions[i].y);
+        }
+
+        float ti = lastPositionsTimes[0] + time / 2000f + CustomNetworkManager.singleton.client.GetRTT() / 2000f +
+                  (lastPositionsTimes[0] - lastPositionsTimes[1]);
+
+        Debug.Log("time =================>");
+        Debug.Log("Time.time : " + Time.time);
+        Debug.Log("Time : " + time / 2000f);
+        Debug.Log("ping : " + CustomNetworkManager.singleton.client.GetRTT() / 2000f);
+        Debug.Log("lastTime[0] : " + lastPositionsTimes[0]);
+        Debug.Log("ti : " + ti);
+        Debug.Log("<================ time");
+
+
+        if (lastPositions[0] != lastPositions[1]) {
+            extrapolatedPosition = new Vector2(Extrapolation.InterpolateX(t, x, ti),
+                Extrapolation.InterpolateX(t, y, ti));
+        }
+
+
     }
 
     [Command]
@@ -132,31 +207,14 @@ public class PlayerController : NetworkBehaviour {
         GetComponentInChildren<SpriteRenderer>().color = c;
     }
 
-    Vector3 ComputeExtrapolatedPosition() {
-        Vector3[] vectorTranslation = new Vector3[9];
-        for(int i = 0;i < 9;i++) {
-            vectorTranslation[i] = lastPositions[i] - lastPositions[i + 1];
-        }
-
-        Vector3 averageTranslation = Vector3.zero;
-        Debug.Log("=============");
-        for (int i = 0; i < 9; i++) {
-            averageTranslation += vectorTranslation[i];
-            Debug.Log(vectorTranslation[i]);
-        }
-
-        Debug.Log(averageTranslation);
-
-        return new Vector3(averageTranslation.x / 9f, averageTranslation.y / 9f, 0);
-    }
-
     // Update is called once per frame
     void Update () {
-        Vector3 offsetExtrapolation = ComputeExtrapolatedPosition() + transform.position;
+        Vector3 offsetExtrapolation = extrapolatedPosition;
+        Vector3 offsetInterpolation = nextNetworkedTransform.GetPosition();
 
         if (!isLocalPlayer && isClient) {
 	        transform.eulerAngles = nextNetworkedTransform.GetRotationEulerAngle();
-	        transform.position = Vector2.Lerp(transform.position, nextNetworkedTransform.GetPosition(), Time.deltaTime * speed);
+	        transform.position = Vector2.Lerp(transform.position, offsetExtrapolation, Time.deltaTime * speed * 2);
 	        return;
 	    }
 
@@ -168,8 +226,6 @@ public class PlayerController : NetworkBehaviour {
         Vector3 topRight = new Vector2(0.5f,0.5f);
         Vector3 bottomLeft = new Vector2(-0.5f,-0.5f);
         Vector3 bottomRight = new Vector2(0.5f,-0.5f);
-
-        Vector3 offsetInterpolation = nextNetworkedTransform.GetPosition();
 
         Debug.DrawLine(offsetInterpolation + topLeft, offsetInterpolation + topRight, Color.blue);
         Debug.DrawLine(offsetInterpolation + topRight, offsetInterpolation + bottomRight, Color.blue);

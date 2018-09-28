@@ -246,5 +246,7 @@ public class EnemyController : NetworkBehaviour {
         if (isServer) {
             NetworkServer.Destroy(gameObject);
         }
+
+        Destroy(instance, 1f);
     }
 }
