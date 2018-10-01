@@ -14,6 +14,8 @@ public class BulletGhost : MonoBehaviour {
 
     Bullet targetBullet ;
 
+    bool hadTarget = false;
+
     Rigidbody2D body;
 
     float t = 0;
@@ -26,12 +28,16 @@ public class BulletGhost : MonoBehaviour {
         if (targetBullet != null) {
             transform.position = Vector2.Lerp(transform.position, targetBullet.transform.position, t);
 
-            if (Vector2.Distance(transform.position, targetBullet.transform.position) < 0.05f) {
+            if (Vector2.Distance(transform.position, targetBullet.transform.position) < 0.075f) {
                 Destroy(gameObject);
                 targetBullet.Show();
             }
 
-            t += 0.1f;
+            t += 0.15f;
+        } else {
+            if (hadTarget) {
+                Destroy(gameObject);
+            }
         }
     }
 
@@ -39,6 +45,7 @@ public class BulletGhost : MonoBehaviour {
         bulletColor = owner.GetColor();
 
         if (target) {
+            hadTarget = true;
             GetComponent<Rigidbody2D>().velocity = Vector2.zero;
             targetBullet = target.GetComponent<Bullet>();
             targetBullet.Hide();

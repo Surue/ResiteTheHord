@@ -277,17 +277,9 @@ public class PlayerController : NetworkBehaviour {
 
     [Command]
     void CmdFire(Vector3 pos, Quaternion rot, float time, NetworkIdentity id) {
-        GameObject bullet = Instantiate(bulletPrefab, pos, rot);    
+        GameObject bullet = Instantiate(bulletPrefab, pos, rot);  
 
         Vector2 vel = bullet.transform.up * bulletSpeed; //Compute velocity
-
-        bullet.GetComponentInChildren<Rigidbody2D>().velocity = vel; //Add velocity
-
-        bullet.GetComponent<Bullet>().Initialize(this); //Setup color information
-
-        NetworkServer.Spawn(bullet);
-
-        bullet.GetComponent<Bullet>().RpcCompensatePosition(time, vel); //Compensate position on client
 
         //Compensate position on server
         bullet.transform.position += ((Vector3)vel * (time / 2000f)); //Compensate position on server with no-collision
@@ -297,11 +289,17 @@ public class PlayerController : NetworkBehaviour {
         RaycastHit2D hit = Physics2D.Raycast(pos, bullet.transform.up, Vector2.Distance(pos, bullet.transform.position) + 0.2f, layerMask);
         
         if (hit) {
-            RpcDebug("hit => " + hit.collider.name);
+            TargetDestroyGhostBullet(id.connectionToClient);
 
             Destroy(bullet);
         } else {
+            bullet.GetComponentInChildren<Rigidbody2D>().velocity = vel; //Add velocity
+
+            bullet.GetComponent<Bullet>().Initialize(this); //Setup color information
+
             NetworkServer.Spawn(bullet);
+
+            bullet.GetComponent<Bullet>().RpcCompensatePosition(time, vel); //Compensate position on client
 
             TargetDestroyGhostBullet(id.connectionToClient);
             RpcSpawnGhostBullet(bullet);
