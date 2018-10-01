@@ -339,10 +339,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   timerText: {fileID: 1296866180}
   scaleCurve:
-    serializedVersion: 2
     m_Curve:
-    - serializedVersion: 3
-      time: 0
+    - time: 0
       value: 1.0000012
       inSlope: -3.0389395
       outSlope: -3.0389395
@@ -350,8 +348,7 @@ MonoBehaviour:
       weightedMode: 0
       inWeight: 0.33333334
       outWeight: 0.08219179
-    - serializedVersion: 3
-      time: 1.0003853
+    - time: 1.0003853
       value: 0
       inSlope: 0
       outSlope: 0
@@ -8229,6 +8226,11 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4752011147407970, guid: abe5f0ac868f2aa4294179eb160d404d, type: 2}
       propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114967518903546298, guid: abe5f0ac868f2aa4294179eb160d404d,
+        type: 2}
+      propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []

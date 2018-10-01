@@ -5,9 +5,25 @@ using UnityEngine.Networking;
 
 public class EnemyController : NetworkBehaviour {
 
-    public const int MAX_HEALTH = 100;
+    #region Transform interpolation
+    public struct NetworkedTransform {
+        public float posX;
+        public float posY;
 
-    List<Vector2> path = new List<Vector2>();
+        public Vector3 GetPosition() {
+            return new Vector3(posX, posY, 0);
+        }
+    }
+
+    NetworkedTransform nextNetworkedTransform;
+
+    Vector3 interpollatedPosition = new Vector3();
+    Vector3 extrapolatedPosition = new Vector3();
+    #endregion
+
+    [Header("Movement")]
+    [SerializeField] float speed = 2f;
+    List<Vector2> path;
 
     static float TIME_CHECK_PATH = 1.5f;
     float timerCheckPath = 0f;
@@ -16,6 +32,7 @@ public class EnemyController : NetworkBehaviour {
     float timerCheckTarget = 0f;
 
     [Header("Health")]
+    public const int MAX_HEALTH = 100;
     [SerializeField] int lifePoint = 1;
 
     [Header("Attack")]
@@ -28,6 +45,7 @@ public class EnemyController : NetworkBehaviour {
     [SerializeField] ParticleSystem attackParticleSystem;
     [SerializeField] ParticleSystem deathParticleSystem;
     Animator animator;
+    bool isAnimated = false;
 
     [SyncVar]
     Vector2 targetPosition;
@@ -57,6 +75,8 @@ public class EnemyController : NetworkBehaviour {
             return;
         }
 
+        path = new List<Vector2>();
+
         StartCoroutine(FindAllObjects());
     }
 
@@ -71,74 +91,151 @@ public class EnemyController : NetworkBehaviour {
     }
 
     void FixedUpdate() {
-        body.velocity = (targetPosition - (Vector2)transform.position).normalized * 2f;
+        if (isServer) {
+            body.velocity = (targetPosition - (Vector2)transform.position).normalized * speed;
+            CmdUpdatePosition();
+        }
     }
 
-    // Update is called once per frame
-    [Server]
+    [Command]
+    void CmdUpdatePosition() {
+        if (path == null || path.Count == 0) {
+            RpcUpdatePosition(transform.position, transform.position);
+        } else {
+            RpcUpdatePosition(transform.position, path[0]);
+        }
+    }
+
+    [ClientRpc]
+    void RpcUpdatePosition(Vector3 lastPosition, Vector3 nextPos) {
+        nextNetworkedTransform = new NetworkedTransform {
+            posX = lastPosition.x,
+            posY = lastPosition.y
+        };
+
+        interpollatedPosition = lastPosition;
+
+        extrapolatedPosition = lastPosition;
+        
+        if(Mathf.Abs(lastPosition.x - nextPos.x) < 0.1f) { //Vertical movement
+            if(lastPosition.y > nextPos.y) {
+                extrapolatedPosition += Vector3.down * speed * (Time.fixedDeltaTime + (CustomNetworkManager.singleton.client.GetRTT() / 2000f));
+            } else {
+                extrapolatedPosition += Vector3.up * speed * (Time.fixedDeltaTime + (CustomNetworkManager.singleton.client.GetRTT() / 2000f));
+            }
+        } else { //Horizontal movement
+            if(lastPosition.x > nextPos.x) {
+                extrapolatedPosition += Vector3.left * speed * (Time.fixedDeltaTime + (CustomNetworkManager.singleton.client.GetRTT() / 2000f));
+            } else {
+                extrapolatedPosition += Vector3.right * speed * (Time.fixedDeltaTime + (CustomNetworkManager.singleton.client.GetRTT() / 2000f));
+            }
+        }
+    }
+
     void Update() {
-        targetPosition = transform.position;
+        Vector3 topLeft = new Vector2(-0.5f,0.5f);
+        Vector3 topRight = new Vector2(0.5f,0.5f);
+        Vector3 bottomLeft = new Vector2(-0.5f,-0.5f);
+        Vector3 bottomRight = new Vector2(0.5f,-0.5f);
 
-        switch(state) {
-            case State.INITIALIZE:
-                break;
+        Debug.DrawLine(interpollatedPosition + topLeft, interpollatedPosition + topRight, Color.blue);
+        Debug.DrawLine(interpollatedPosition + topRight, interpollatedPosition + bottomRight, Color.blue);
+        Debug.DrawLine(interpollatedPosition + bottomRight, interpollatedPosition + bottomLeft, Color.blue);
+        Debug.DrawLine(interpollatedPosition + bottomLeft, interpollatedPosition + topLeft, Color.blue);
 
-            case State.IDLE:
-                if(path.Count == 0 || path == null) {
-                    path = pathFinder.GetPathFromTo(transform, player.transform);
-                    state = State.MOVE;
-                }
-                break;
+        Debug.DrawLine(extrapolatedPosition + topLeft, extrapolatedPosition + topRight, Color.red);
+        Debug.DrawLine(extrapolatedPosition + topRight, extrapolatedPosition + bottomRight, Color.red);
+        Debug.DrawLine(extrapolatedPosition + bottomRight, extrapolatedPosition + bottomLeft, Color.red);
+        Debug.DrawLine(extrapolatedPosition + bottomLeft, extrapolatedPosition + topLeft, Color.red);
 
-            case State.MOVE:
-                if(path == null || path.Count == 0) {
-                    state = State.IDLE;
-                }
+        if (isClient) {
+            transform.position = Vector2.Lerp(transform.position, extrapolatedPosition, Time.deltaTime * speed * 5);
+        }
 
-                targetPosition = path[0];
+        if(isServer){
+            targetPosition = transform.position;
+            
+            switch (state) {
+                case State.INITIALIZE:
+                    break;
 
-                if(Vector2.Distance((Vector3)transform.position, path[0]) < 0.1f) {
-                    path.RemoveAt(0);
+                case State.IDLE:
+                    path.Clear();
+                    if (path.Count == 0 || path == null) {
+                        GetPath();
+                        state = State.MOVE;
+                    } else {
 
-                    if(path.Count == 0) {
+                    }
+
+                    break;
+
+                case State.MOVE:
+                    if (path == null || path.Count == 0) {
+                        state = State.IDLE;
+                    } else {
+                        if(Vector2.Distance((Vector3)transform.position, path[0]) < 0.1f) {
+                            path.RemoveAt(0);
+
+                            if(path.Count == 0) {
+                                state = State.IDLE;
+                            } else {
+                                targetPosition = path[0];
+                            }
+                        } else {
+                            targetPosition = path[0];
+                        }
+                    }
+
+                    if (timerCheckPath > TIME_CHECK_PATH) {
+                        timerCheckPath = 0;
+                        GetPath();
+                    } else {
+                        timerCheckPath += Time.deltaTime;
+                    }
+
+                    break;
+
+                case State.ATTACK:
+                    body.velocity = Vector2.zero;
+                    foreach (GameObject target in attackTargets) {
+                        if (target.GetComponent<Health>()) {
+                            target.GetComponent<Health>().TakeDamage(1);
+                        }
+                    }
+
+                    path.Clear();
+
+                    RpcStartAnimation();
+                    state = State.ATTACK_ANIMATION;
+                    isAnimated = true;
+                    break;
+
+                case State.ATTACK_ANIMATION:
+                    if (!isAnimated) {
                         state = State.IDLE;
                     }
-                }
-
-                if(timerCheckPath > TIME_CHECK_PATH) {
-                    timerCheckPath = 0;
-                    path = pathFinder.GetPathFromTo(transform, player.transform);
-                } else {
-                    timerCheckPath += Time.deltaTime;
-                }
-                break;
-
-            case State.ATTACK:
-                body.velocity = Vector2.zero;
-                foreach(GameObject target in attackTargets) {
-                    if(target.GetComponent<Health>()) {
-                        target.GetComponent<Health>().TakeDamage(1);
-                    }
-                }
-
-                path = new List<Vector2>();
-
-                RpcStartAnimation();
-                state = State.ATTACK_ANIMATION;
-                break;
-
-            case State.ATTACK_ANIMATION:
-                break;
-        }
-
-        if(timerCheckTarget > TIME_CHECK_TARGET && state != State.ATTACK) {
-            timerCheckTarget = 0;
-            if(CheckAttackTarget()) {
-                state = State.ATTACK;
+                    break;
             }
-        } else {
-            timerCheckTarget += Time.deltaTime;
+
+            if (timerCheckTarget > TIME_CHECK_TARGET && state != State.ATTACK) {
+                timerCheckTarget = 0;
+                if (CheckAttackTarget()) {
+                    state = State.ATTACK;
+                }
+            } else {
+                timerCheckTarget += Time.deltaTime;
+            }
         }
+    }
+
+    [ClientRpc]
+    void RpcDebug(string s) {
+        Debug.Log(s);
+    }
+
+    void GetPath() {
+        path = pathFinder.GetPathFromTo(transform, player.transform);
     }
 
     [ClientRpc]
@@ -157,7 +254,7 @@ public class EnemyController : NetworkBehaviour {
 
         transform.rotation = Quaternion.identity;
 
-        state = State.IDLE;
+        isAnimated = false;
     }
 
     [Server]
@@ -220,21 +317,16 @@ public class EnemyController : NetworkBehaviour {
         lifePoint -= damage;
 
         if (lifePoint <= 0) {
-            //Question pour ordre d'execution de la destruction et évite cette double instantiation
             RpcDeath(); //For all clients
-
-            //for host -> Destroy to soon
-            //GameObject instance = Instantiate(deathParticleSystem).gameObject;
-            //instance.transform.position = transform.position;
 
             Score score = GetComponent<Score>();
             if(score) {
                 bulletOwner.CmdAddScore(GetComponent<Score>().transform.position, score.score);
             }
 
-            if(!isClient && isServer) {
-                NetworkServer.Destroy(gameObject);
-            }
+            //if(!isClient && isServer) {
+            //    NetworkServer.Destroy(gameObject);
+            //}
         }
     }
 

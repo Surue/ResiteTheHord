@@ -13,12 +13,24 @@ public class AvailableMatchesList : MonoBehaviour {
     static List<LanConnectionInfo> lan = new List<LanConnectionInfo>();
 
     public static void HandleNewMatchList(List<MatchInfoSnapshot> matchList) {
-        if (matches == matchList) {
+        if (matches == matchList || matchList.Count == 0) {
             return;
-        }
+        } else {
+            if (matches.Count == matchList.Count) {
 
-        matches = matchList;
-        OnAvailableMatchesChanged(matches, lan);
+                for (int i = 0; i < matchList.Count; i++) {
+                    if (matchList[i].hostNodeId != matches[i].hostNodeId) {
+                        matches = matchList;
+                        OnAvailableMatchesChanged(matches, lan);
+                        Debug.Log("ICI");
+                        return;
+                    }
+                }
+            } else {
+                matches = matchList;
+                OnAvailableMatchesChanged(matches, lan);
+            }
+        }
     }
 
     public static void HandleNewLanList(List<LanConnectionInfo> matchList) {

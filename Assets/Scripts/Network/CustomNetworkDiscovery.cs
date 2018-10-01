@@ -24,7 +24,7 @@ public class CustomNetworkDiscovery : NetworkDiscovery {
 
     public string ip;
 
-    float timeout = 5f;
+    float timeout = 1f;
 
     void Awake() {
         base.Initialize();
@@ -80,6 +80,7 @@ public class CustomNetworkDiscovery : NetworkDiscovery {
         //foreach(var key in keys) {
         //    Debug.Log(key.ipAddress);
         //    Debug.Log(key.name);
+        //    Debug.Log(key.port);
         //}
 
         AvailableMatchesList.HandleNewLanList(lanAddresses.Keys.ToList());

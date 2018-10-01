@@ -29,7 +29,7 @@ public class CustomNetworkManager:NetworkManager {
     public void StartHosting() {
         isServer = true;
         StartMatchMaker();
-        matchMaker.CreateMatch("Nico", 4, true, "", "", "", 0, 0, OnMatchCreated);
+        matchMaker.CreateMatch("Match", 4, true, "", "", "", 0, 0, OnMatchCreated);
     }
 
     public void StartLan() {

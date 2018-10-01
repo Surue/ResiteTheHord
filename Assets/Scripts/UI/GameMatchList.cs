@@ -9,6 +9,9 @@ public class GameMatchList : MonoBehaviour {
     [SerializeField]
     JoinPanel joinPanelPrefab;
 
+    Dictionary<MatchInfoSnapshot, JoinPanel> matchesButton = new Dictionary<MatchInfoSnapshot, JoinPanel>();
+    Dictionary<LanConnectionInfo, JoinPanel> lan = new Dictionary<LanConnectionInfo, JoinPanel>();
+
     void Start() {
         AvailableMatchesList.OnAvailableMatchesChanged += AvailableMatchesList_OnAvailableMatchesChanged;
         AvailableMatchesList.OnAvailableLanChanged += AvailableMatchesList_OnAvailableLanChanged;
@@ -19,14 +22,23 @@ public class GameMatchList : MonoBehaviour {
         AvailableMatchesList.OnAvailableLanChanged -= AvailableMatchesList_OnAvailableLanChanged;
     }
 
-    private void AvailableMatchesList_OnAvailableMatchesChanged(List<MatchInfoSnapshot> matches, List<LanConnectionInfo> lan) {
+    void AvailableMatchesList_OnAvailableMatchesChanged(List<MatchInfoSnapshot> matches, List<LanConnectionInfo> lan) {
         ClearExistingButton();
         CreateNewJoinGameButtons(matches, lan);
     }
 
-    private void AvailableMatchesList_OnAvailableLanChanged(List<MatchInfoSnapshot> matches, List<LanConnectionInfo> lan) {
+    void AvailableMatchesList_OnAvailableLanChanged(List<MatchInfoSnapshot> matches, List<LanConnectionInfo> lan) {
         ClearExistingButton();
         CreateNewJoinGameButtons(matches, lan);
+    }
+
+    void UpdateButton(List<MatchInfoSnapshot> matches, List<LanConnectionInfo> lan) {
+        foreach (LanConnectionInfo l in lan) {
+
+        }
+
+        foreach(MatchInfoSnapshot match in matches) {
+        }
     }
 
     void ClearExistingButton() {

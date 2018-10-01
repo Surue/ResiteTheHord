@@ -50,9 +50,12 @@ public class Bullet : NetworkBehaviour {
         trail.startColor = c;
         trail.endColor = c;
     }
-
-    [Server]
+    
     void OnTriggerEnter2D(Collider2D other) {
+        if (!isServer) {
+            return;
+        }
+
         if (other.gameObject.CompareTag("Player")) {
             return;
         }
