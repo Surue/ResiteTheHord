@@ -13,6 +13,7 @@ public class JoinPanel : MonoBehaviour {
     bool isLan = false;
 
     [SerializeField]TextMeshProUGUI matchName;
+    [SerializeField] Animator animator;
 
     public void Initialize(MatchInfoSnapshot match, Transform panelTransform) {
         transform.SetParent(panelTransform);
@@ -36,6 +37,25 @@ public class JoinPanel : MonoBehaviour {
         this.lan = lan;
 
         matchName.text = this.lan.name;
+    }
+
+    public void MoveUp() {
+        //animator.SetTrigger("MoveUp");
+    }
+
+    public void Disparition() {
+        animator.SetTrigger("Disparition");
+
+        float time = 0;
+        RuntimeAnimatorController ac = animator.runtimeAnimatorController;    //Get Animator controller
+        for(int i = 0;i < ac.animationClips.Length;i++)                 //For all animations
+        {
+            if(ac.animationClips[i].name == "Disparition")        //If it has the same name as your clip
+            {
+                time = ac.animationClips[i].length;
+            }
+        }
+        Destroy(gameObject, time);
     }
 
     public void JoinMatch() {

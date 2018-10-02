@@ -172,6 +172,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   matchName: {fileID: 114572563482013588}
+  animator: {fileID: 95534563249164504}
 --- !u!114 &114271114418040344
 MonoBehaviour:
   m_ObjectHideFlags: 1

@@ -22,7 +22,6 @@ public class AvailableMatchesList : MonoBehaviour {
                     if (matchList[i].hostNodeId != matches[i].hostNodeId) {
                         matches = matchList;
                         OnAvailableMatchesChanged(matches, lan);
-                        Debug.Log("ICI");
                         return;
                     }
                 }
