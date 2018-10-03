@@ -17,7 +17,7 @@ public class PanelPlayer : NetworkBehaviour {
     [HideInInspector]
     public string username = "Player 0";
 
-    PlayerInfoController playerInfoController;
+    PlayerInfo playerInfo;
 
     void Start() {
         toggle = GetComponentInChildren<Toggle>();
@@ -33,7 +33,7 @@ public class PanelPlayer : NetworkBehaviour {
         }
 
         if(isLocalPlayer) { 
-            playerInfoController = FindObjectOfType<PlayerInfoController>();
+            playerInfo = FindObjectOfType<PlayerInfo>();
         }
         
         StartCoroutine(Initialize());
@@ -53,7 +53,7 @@ public class PanelPlayer : NetworkBehaviour {
 
     void Update() {
         if (isLocalPlayer) {
-            CmdSetUsername(playerInfoController.GetName());
+            CmdSetUsername(playerInfo.GetName());
         }
     }
 

@@ -9,7 +9,7 @@ public class PlayerInfoFiller : MonoBehaviour {
 
     [SerializeField] TextMeshProUGUI nameText;
 
-    PlayerInfoController playerInfoController;
+    PlayerInfo playerInfo;
 
     [SerializeField] SpriteRenderer playerGhost;
 
@@ -19,25 +19,25 @@ public class PlayerInfoFiller : MonoBehaviour {
 	}
 
     IEnumerator FillInfo() {
-        playerInfoController = FindObjectOfType<PlayerInfoController>();
-        while (playerInfoController == null) {
-            playerInfoController = FindObjectOfType<PlayerInfoController>();
+        playerInfo = FindObjectOfType<PlayerInfo>();
+        while (playerInfo == null) {
+            playerInfo = FindObjectOfType<PlayerInfo>();
 
             yield return new WaitForEndOfFrame();
         }
 
-        nameText.text = playerInfoController.GetName();
+        nameText.text = playerInfo.GetName();
 
-        playerGhost.color = playerInfoController.GetColor();
+        playerGhost.color = playerInfo.GetColor();
     }
 
     public void UpdateUsername(string newName) {
-        playerInfoController.UpdateUsername(newName);
+        playerInfo.SetName(newName);
     }
 
     public void UpdateColor(Image button) {
         playerGhost.color = button.color;
 
-        playerInfoController.UpdateColor(button.color);
+        playerInfo.SetColor(button.color);
     }
 }

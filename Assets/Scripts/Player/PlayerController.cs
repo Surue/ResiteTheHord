@@ -69,7 +69,8 @@ public class PlayerController : NetworkBehaviour {
 	    if (isLocalPlayer) {
 	        FindObjectOfType<cameraController>().focusedObject = gameObject;
 
-	        PlayerInfoController tmp = FindObjectOfType<PlayerInfoController>();
+	        PlayerInfo tmp = FindObjectOfType<PlayerInfo>();
+
 	        if (tmp) {
 	            CmdSetColor(tmp.GetColor());
 	            CmdSetName(tmp.GetName());
