@@ -1,9 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Networking;
+using UnityEngine.XR.WSA;
 
 public class PanelPlayer : NetworkBehaviour {
 
@@ -18,6 +20,10 @@ public class PanelPlayer : NetworkBehaviour {
     public string username = "Player 0";
 
     PlayerInfo playerInfo;
+
+    List<PanelPlayer> otherPlayer = new List<PanelPlayer>();
+
+    Animator animator;
 
     void Start() {
         toggle = GetComponentInChildren<Toggle>();
@@ -39,10 +45,14 @@ public class PanelPlayer : NetworkBehaviour {
         StartCoroutine(Initialize());
 
         if(isReady) {
-            GetComponent<Image>().color = new Color(0, 255, 0);
+            GetComponentInChildren<Image>().color = new Color(0, 255, 0);
         } else {
-            GetComponent<Image>().color = new Color(255, 0, 0);
+            GetComponentInChildren<Image>().color = new Color(255, 0, 0);
         }
+
+        otherPlayer = FindObjectsOfType<PanelPlayer>().ToList();
+
+        animator = GetComponentInChildren<Animator>();
     }
 
     IEnumerator Initialize() {
@@ -55,13 +65,33 @@ public class PanelPlayer : NetworkBehaviour {
         if (isLocalPlayer) {
             CmdSetUsername(playerInfo.GetName());
         }
+
+        if (otherPlayer.Count > 0) {
+            //List<PanelPlayer> tmp = new List<PanelPlayer>();
+
+            //bool shouldGoUp = false;
+
+            //foreach (PanelPlayer panelPlayer in otherPlayer) {
+            //    if (panelPlayer == null) {
+            //        shouldGoUp = true;
+            //    } else {
+            //        tmp.Add(panelPlayer);
+            //    }
+            //}
+
+            //if (shouldGoUp) {
+            //    animator.SetTrigger("moveUp");
+            //}
+
+            //otherPlayer = tmp;
+        }
     }
 
     void OnIsReady(bool ready) {
         if(ready) {
-            GetComponent<Image>().color = new Color(0, 255, 0);
+            GetComponentInChildren<Image>().color = new Color(0, 255, 0);
         } else {
-            GetComponent<Image>().color = new Color(255, 0, 0);
+            GetComponentInChildren<Image>().color = new Color(255, 0, 0);
         }
     }
 
@@ -77,5 +107,8 @@ public class PanelPlayer : NetworkBehaviour {
     [Command]
     public void CmdSetUsername(string s) {
         username = s;
+    }
+
+    public override void OnNetworkDestroy() {
     }
 }
