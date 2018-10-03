@@ -26,7 +26,7 @@ GameObject:
   - component: {fileID: 114598350276571318}
   - component: {fileID: 50797227321344832}
   - component: {fileID: 114086754975316576}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Enemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -43,7 +43,7 @@ GameObject:
   - component: {fileID: 4023453210188032}
   - component: {fileID: 212783481610604614}
   - component: {fileID: 95480943250692058}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: glowEffect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -60,7 +60,7 @@ GameObject:
   - component: {fileID: 4394649216073782}
   - component: {fileID: 198254202494100566}
   - component: {fileID: 199598642794479678}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Particle System
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -101,7 +101,7 @@ Transform:
   m_GameObject: {fileID: 1013236632694570}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 3.5742388, y: 3.3133576, z: 0}
-  m_LocalScale: {x: 0.9, y: 0.9, z: 0.9}
+  m_LocalScale: {x: 0.7, y: 0.7, z: 0.7}
   m_Children:
   - {fileID: 4394649216073782}
   - {fileID: 4023453210188032}
@@ -194,6 +194,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7627076b1c4638b4a9d4c0b90c8106d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  speed: 2
   lifePoint: 1
   attackRange: 0.6
   canMultipleAttack: 0
@@ -239,7 +240,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1013236632694570}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: -1768714887, guid: dc443db3e92b4983b9738c1131f555cb, type: 3}
   m_Name: 

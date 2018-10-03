@@ -18,6 +18,8 @@ public class Bullet : NetworkBehaviour {
 
     [SerializeField] TrailRenderer trail;
 
+    [SerializeField] LayerMask layerToIgnore;
+
     PlayerController owner;
 
     void Start() {
@@ -56,10 +58,10 @@ public class Bullet : NetworkBehaviour {
             return;
         }
 
-        if (other.gameObject.CompareTag("Player")) {
+        if(((1 << other.gameObject.layer) & layerToIgnore) != 0) {
             return;
         }
-        
+
         GameObject hit = other.gameObject;
         Health health = hit.GetComponent<Health>();
 
@@ -67,7 +69,7 @@ public class Bullet : NetworkBehaviour {
             health.TakeDamage(1);
         }
 
-        EnemyController enemy = hit.GetComponent<EnemyController>();
+        EnnemyHealth enemy = hit.GetComponent<EnnemyHealth>();
 
         if (enemy != null) {
             enemy.TakeDamage(1, owner);

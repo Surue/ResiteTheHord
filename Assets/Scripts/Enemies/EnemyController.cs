@@ -164,8 +164,6 @@ public class EnemyController : NetworkBehaviour {
                     if (path.Count == 0 || path == null) {
                         GetPath();
                         state = State.MOVE;
-                    } else {
-
                     }
 
                     break;

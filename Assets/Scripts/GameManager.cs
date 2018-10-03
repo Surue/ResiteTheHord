@@ -6,6 +6,7 @@ using UnityEngine.Networking;
 public class GameManager : NetworkBehaviour {
 
     [SerializeField] bool skipIntro = false;
+    [SerializeField] GameObject mainGoalForEnnemies;
 
     PlayerController[] players;
     EnemySpawner[] enemySpawners;
@@ -126,5 +127,9 @@ public class GameManager : NetworkBehaviour {
 
     public void FinishedSpawn() {
         spawnerFinishedSpawn++;
+    }
+
+    public GameObject GetMainGoalForEnnemies() {
+        return mainGoalForEnnemies;
     }
 }
