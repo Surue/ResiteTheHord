@@ -2,32 +2,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using Debug = UnityEngine.Debug;
 
 public class EnnemyHealth : Health {
 
-    [Server]
-    public void TakeDamage(int damage, PlayerController bulletOwner) {
-        currentHealth -= damage;
-
-        if(currentHealth <= 0) {
-            RpcDeath();
-
-            Score score = GetComponent<Score>();
-            if(score) {
-                bulletOwner.CmdAddScore(GetComponent<Score>().transform.position, score.score);
-            }
-        }
-    }
-
     [ClientRpc]
-    void RpcDeath() {
+    public override void RpcDestroy() {
         GameObject instance = Instantiate(explosionParticleSystem).gameObject;
         instance.transform.position = transform.position;
 
+        Destroy(instance, 1f);
+
         if(isServer) {
             NetworkServer.Destroy(gameObject);
+        } else {
+            Destroy(instance);
         }
-
-        Destroy(instance, 1f);
     }
 }

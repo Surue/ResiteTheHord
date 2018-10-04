@@ -293,15 +293,11 @@ public class PlayerController : NetworkBehaviour {
             TargetDestroyGhostBullet(id.connectionToClient);
 
             Destroy(bullet);
-
-            RpcDebug("Ici");
         } else {
             LayerMask layerMaskEnemy = 1 << LayerMask.NameToLayer("Enemy");
 
             RaycastHit2D hitEnemy = Physics2D.Raycast(pos, bullet.transform.up, Vector2.Distance(pos, bullet.transform.position) + 0.2f, layerMaskEnemy);
-            RpcDebug("before test");
             if (hitEnemy) {
-                RpcDebug("Destroy");
                 bullet.GetComponentInChildren<Rigidbody2D>().velocity = vel; //Add velocity
 
                 bullet.GetComponent<Bullet>().Initialize(this); //Setup color information
@@ -311,11 +307,10 @@ public class PlayerController : NetworkBehaviour {
                 Health health = hitEnemy.collider.GetComponent<Health>();
 
                 if (health) {
-                    health.TakeDamage(1);
+                    health.TakeDamage(1, this);
                 }
 
                 bullet.GetComponent<Bullet>().CmdForceDestroy();
-                RpcDebug("Destroy");
             } else {
                 bullet.GetComponentInChildren<Rigidbody2D>().velocity = vel; //Add velocity
 

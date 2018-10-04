@@ -310,7 +310,7 @@ MonoBehaviour:
   trail: {fileID: 96377840605539684}
   layerToIgnore:
     serializedVersion: 2
-    m_Bits: 512
+    m_Bits: 4608
 --- !u!212 &212394629738230250
 SpriteRenderer:
   m_ObjectHideFlags: 1

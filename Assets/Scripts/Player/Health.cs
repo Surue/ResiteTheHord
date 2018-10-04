@@ -14,16 +14,18 @@ public class Health : NetworkBehaviour {
     [SerializeField] protected ParticleSystem explosionParticleSystem;
 
     [Server]
-    public void TakeDamage(int damage) {
+    public void TakeDamage(int damage, PlayerController bulletOwner = null) {
         currentHealth -= damage;
 
         if (currentHealth <= 0) {
             if (destroyOnDeath) {
                 RpcDestroy();
 
-                NetworkServer.Destroy(gameObject);
+                Score score = GetComponent<Score>();
+                if(score != null && bulletOwner != null) {
+                    bulletOwner.CmdAddScore(score.transform.position, score.score);
+                }
             } else {
-                currentHealth = MAX_HEALTH;
                 RpcRespawn();
             }
         } else {

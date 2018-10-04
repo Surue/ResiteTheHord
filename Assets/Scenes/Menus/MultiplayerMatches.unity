@@ -1348,6 +1348,11 @@ Prefab:
       propertyPath: m_Channels.Array.size
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 114450123715630890, guid: 6896a4867ce7a2a479edb4980ff11579,
+        type: 2}
+      propertyPath: m_SpawnPrefabs.Array.size
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 4247927079184186, guid: 6896a4867ce7a2a479edb4980ff11579, type: 2}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1414,6 +1419,18 @@ Prefab:
       propertyPath: m_SimulatedLatency
       value: 50
       objectReference: {fileID: 0}
+    - target: {fileID: 114450123715630890, guid: 6896a4867ce7a2a479edb4980ff11579,
+        type: 2}
+      propertyPath: m_SpawnPrefabs.Array.data[1]
+      value: 
+      objectReference: {fileID: 1230865007041762, guid: 1d36a0ed518f52e47afe11cb1e3ac2d1,
+        type: 2}
+    - target: {fileID: 114450123715630890, guid: 6896a4867ce7a2a479edb4980ff11579,
+        type: 2}
+      propertyPath: m_SpawnPrefabs.Array.data[3]
+      value: 
+      objectReference: {fileID: 1358923401875184, guid: cdfbbb1c9dbcba945abebfa8403e8c05,
+        type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6896a4867ce7a2a479edb4980ff11579, type: 2}
   m_IsPrefabAsset: 0

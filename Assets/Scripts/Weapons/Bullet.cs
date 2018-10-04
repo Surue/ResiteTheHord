@@ -93,13 +93,15 @@ public class Bullet : NetworkBehaviour {
         GameObject instance = Instantiate(explosionParticle).gameObject;
         instance.transform.position = (Vector2)transform.position - GetComponent<Rigidbody2D>().velocity.normalized * 0.04f;
 
+        Destroy(instance, 1f);
+
         ParticleSystem.MainModule main = instance.GetComponent<ParticleSystem>().main;
         main.startColor = bulletColor;
 
         if(isServer) {
             NetworkServer.Destroy(gameObject);
         } else {
-            Destroy(instance, 0.3f);
+            Destroy(gameObject);
         }
     }
 

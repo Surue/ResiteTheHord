@@ -41,6 +41,10 @@ public class PlayerHealth : Health {
     [ClientRpc]
     public override void RpcRespawn() {
         if(isLocalPlayer) {
+            currentHealth = MAX_HEALTH;
+
+            RpcOnHealthChanged(currentHealth);
+
             transform.position = Vector3.zero;
         }
     }
