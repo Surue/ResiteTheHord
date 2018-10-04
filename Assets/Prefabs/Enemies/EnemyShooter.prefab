@@ -220,8 +220,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f57b408bfee7ba4686d97b40362dd8e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lifePoint: 1
-  deathParticleSystem: {fileID: 198615512229359388, guid: 523491aea7bd4b147a8255b82e10fbda,
+  destroyOnDeath: 1
+  currentHealth: 1
+  explosionParticleSystem: {fileID: 198615512229359388, guid: 523491aea7bd4b147a8255b82e10fbda,
     type: 2}
 --- !u!114 &114976118552824582
 MonoBehaviour:

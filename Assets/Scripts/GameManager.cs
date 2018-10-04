@@ -21,7 +21,6 @@ public class GameManager : NetworkBehaviour {
     CountDownTimer countDownTimer;
 
     //Life system
-    int lifeRemaining = 5;
     List<GameObject> playersWaitingToRespawn = new List<GameObject>();
 
     enum State {
@@ -108,21 +107,19 @@ public class GameManager : NetworkBehaviour {
 	    }
 
 	    if (playersWaitingToRespawn.Count > 0) {
-	        if (lifeRemaining > 0) {
-	            lifeRemaining -= 1;
-                
-                playersWaitingToRespawn[playersWaitingToRespawn.Count - 1].GetComponent<Health>().RpcRespawn();
-                playersWaitingToRespawn.RemoveAt(playersWaitingToRespawn.Count - 1);
-	        }else if (players.Length == playersWaitingToRespawn.Count) {
-	            FindObjectOfType<CustomNetworkManager>().ServerChangeScene("lobby");
-	        }
+            playersWaitingToRespawn[playersWaitingToRespawn.Count - 1].GetComponent<Health>().RpcRespawn();
+            playersWaitingToRespawn.RemoveAt(playersWaitingToRespawn.Count - 1);
 	    }
 	}
 
     public void OnPlayerDeath(GameObject player) {
-        Debug.Log("A player died : " + lifeRemaining);
+        Debug.Log("A player died");
 
         playersWaitingToRespawn.Add(player);
+    }
+
+    public void OnMainCoreDestroyed() {
+        Debug.Log("Main core destroyed");
     }
 
     public void FinishedSpawn() {

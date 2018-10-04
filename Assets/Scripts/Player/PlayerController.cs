@@ -285,7 +285,7 @@ public class PlayerController : NetworkBehaviour {
         //Compensate position on server
         bullet.transform.position += ((Vector3)vel * (time / 2000f)); //Compensate position on server with no-collision
         
-        LayerMask layerMask = ~((1 << LayerMask.NameToLayer("Bullet")) | (1 << LayerMask.NameToLayer("Player")));
+        LayerMask layerMask = ~((1 << LayerMask.NameToLayer("Bullet")) | (1 << LayerMask.NameToLayer("Player")) | (1 << LayerMask.NameToLayer("Enemy")));
 
         RaycastHit2D hit = Physics2D.Raycast(pos, bullet.transform.up, Vector2.Distance(pos, bullet.transform.position) + 0.2f, layerMask);
         
@@ -293,19 +293,43 @@ public class PlayerController : NetworkBehaviour {
             TargetDestroyGhostBullet(id.connectionToClient);
 
             Destroy(bullet);
+
+            RpcDebug("Ici");
         } else {
-            bullet.GetComponentInChildren<Rigidbody2D>().velocity = vel; //Add velocity
+            LayerMask layerMaskEnemy = 1 << LayerMask.NameToLayer("Enemy");
 
-            bullet.GetComponent<Bullet>().Initialize(this); //Setup color information
+            RaycastHit2D hitEnemy = Physics2D.Raycast(pos, bullet.transform.up, Vector2.Distance(pos, bullet.transform.position) + 0.2f, layerMaskEnemy);
+            RpcDebug("before test");
+            if (hitEnemy) {
+                RpcDebug("Destroy");
+                bullet.GetComponentInChildren<Rigidbody2D>().velocity = vel; //Add velocity
 
-            NetworkServer.Spawn(bullet);
+                bullet.GetComponent<Bullet>().Initialize(this); //Setup color information
 
-            bullet.GetComponent<Bullet>().RpcCompensatePosition(time, vel); //Compensate position on client
+                NetworkServer.Spawn(bullet);
+                TargetDestroyGhostBullet(id.connectionToClient);
+                Health health = hitEnemy.collider.GetComponent<Health>();
 
-            TargetDestroyGhostBullet(id.connectionToClient);
-            RpcSpawnGhostBullet(bullet);
+                if (health) {
+                    health.TakeDamage(1);
+                }
 
-            Destroy(bullet, 2f);
+                bullet.GetComponent<Bullet>().CmdForceDestroy();
+                RpcDebug("Destroy");
+            } else {
+                bullet.GetComponentInChildren<Rigidbody2D>().velocity = vel; //Add velocity
+
+                bullet.GetComponent<Bullet>().Initialize(this); //Setup color information
+
+                NetworkServer.Spawn(bullet);
+
+                bullet.GetComponent<Bullet>().RpcCompensatePosition(time, vel); //Compensate position on client
+
+                TargetDestroyGhostBullet(id.connectionToClient);
+                RpcSpawnGhostBullet(bullet);
+            }
+
+
         }
     }
 

@@ -73,7 +73,7 @@ public class EnnemyAttackShooter : NetworkBehaviour {
     [Server]
     bool CheckAttackTarget() {
         Collider2D[] possibleTarget;
-        LayerMask mask = 1 << LayerMask.NameToLayer("Player");
+        LayerMask mask = 1 << LayerMask.NameToLayer("Player") | 1 << LayerMask.NameToLayer("Destroyable");
 
         attackTargets = new List<GameObject>();
 

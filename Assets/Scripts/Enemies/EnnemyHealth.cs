@@ -3,33 +3,25 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class EnnemyHealth : NetworkBehaviour {
-
-    [SerializeField] int lifePoint = 1;
-    [SerializeField] ParticleSystem deathParticleSystem;
+public class EnnemyHealth : Health {
 
     [Server]
     public void TakeDamage(int damage, PlayerController bulletOwner) {
+        currentHealth -= damage;
 
-        lifePoint -= damage;
-
-        if(lifePoint <= 0) {
-            RpcDeath(); //For all clients
+        if(currentHealth <= 0) {
+            RpcDeath();
 
             Score score = GetComponent<Score>();
             if(score) {
                 bulletOwner.CmdAddScore(GetComponent<Score>().transform.position, score.score);
-            }
-
-            if(!isClient && isServer) {
-                NetworkServer.Destroy(gameObject);
             }
         }
     }
 
     [ClientRpc]
     void RpcDeath() {
-        GameObject instance = Instantiate(deathParticleSystem).gameObject;
+        GameObject instance = Instantiate(explosionParticleSystem).gameObject;
         instance.transform.position = transform.position;
 
         if(isServer) {

@@ -77,9 +77,14 @@ public class Bullet : NetworkBehaviour {
 
         RpcDestroy(transform.position);
 
-        if(!isClient && isServer) {
-            NetworkServer.Destroy(gameObject);
-        }
+        //if(!isClient && isServer) {
+        //    NetworkServer.Destroy(gameObject);
+        //}
+    }
+
+    [Command]
+    public void CmdForceDestroy() {
+        RpcDestroy(transform.position);
     }
 
     [ClientRpc]
@@ -91,10 +96,10 @@ public class Bullet : NetworkBehaviour {
         ParticleSystem.MainModule main = instance.GetComponent<ParticleSystem>().main;
         main.startColor = bulletColor;
 
-        Destroy(instance, 0.3f);
-
         if(isServer) {
             NetworkServer.Destroy(gameObject);
+        } else {
+            Destroy(instance, 0.3f);
         }
     }
 

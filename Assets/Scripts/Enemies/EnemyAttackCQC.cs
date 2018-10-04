@@ -82,7 +82,7 @@ public class EnemyAttackCQC : NetworkBehaviour {
     [Server]
     bool CheckAttackTarget() {
         Collider2D[] possibleTarget;
-        LayerMask mask = 1 << LayerMask.NameToLayer("Player");
+        LayerMask mask = 1 << LayerMask.NameToLayer("Destroyable") | 1 << LayerMask.NameToLayer("Player");
 
         attackTargets = new List<GameObject>();
 
