@@ -258,7 +258,19 @@ public class EnemyMovement : NetworkBehaviour {
             } else {
                 extrapolatedPosition += Vector3.up * speed * (Time.fixedDeltaTime + (CustomNetworkManager.singleton.client.GetRTT() / 2000f));
             }
-        } else { //Horizontal movement
+        } else if(Mathf.Abs(lastPosition.y - nextPos.y) < 0.1f) { //Horizontal movement
+            if(lastPosition.x > nextPos.x) {
+                extrapolatedPosition += Vector3.left * speed * (Time.fixedDeltaTime + (CustomNetworkManager.singleton.client.GetRTT() / 2000f));
+            } else {
+                extrapolatedPosition += Vector3.right * speed * (Time.fixedDeltaTime + (CustomNetworkManager.singleton.client.GetRTT() / 2000f));
+            }
+        } else {
+            if(lastPosition.y > nextPos.y) {
+                extrapolatedPosition += Vector3.down * speed * (Time.fixedDeltaTime + (CustomNetworkManager.singleton.client.GetRTT() / 2000f));
+            } else {
+                extrapolatedPosition += Vector3.up * speed * (Time.fixedDeltaTime + (CustomNetworkManager.singleton.client.GetRTT() / 2000f));
+            }
+
             if(lastPosition.x > nextPos.x) {
                 extrapolatedPosition += Vector3.left * speed * (Time.fixedDeltaTime + (CustomNetworkManager.singleton.client.GetRTT() / 2000f));
             } else {
