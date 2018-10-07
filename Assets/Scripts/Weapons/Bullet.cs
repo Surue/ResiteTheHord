@@ -76,10 +76,6 @@ public class Bullet : NetworkBehaviour {
         }
 
         RpcDestroy(transform.position);
-
-        //if(!isClient && isServer) {
-        //    NetworkServer.Destroy(gameObject);
-        //}
     }
 
     [Command]
@@ -100,15 +96,20 @@ public class Bullet : NetworkBehaviour {
 
         if(isServer) {
             NetworkServer.Destroy(gameObject);
-        } else {
-            Destroy(gameObject);
         }
     }
 
     [ClientRpc]
-    public void RpcCompensatePosition(float time, Vector2 vel) {
+    public void RpcCompensatePosition(int time, Vector2 vel) {
         GetComponent<Rigidbody2D>().velocity = vel;
-        transform.position += (Vector3)(vel * (time / 2000f + CustomNetworkManager.singleton.client.GetRTT() / 2000f));
+        byte e;
+        int delay;
+
+        
+            NetworkConnection conn = CustomNetworkManager.singleton.client.connection;
+            delay = NetworkTransport.GetRemoteDelayTimeMS(1, conn.connectionId, time, out e);
+
+        transform.position += (Vector3)(vel * (delay / 1000f));
     }
 
     public PlayerController GetOwner() {
@@ -117,13 +118,11 @@ public class Bullet : NetworkBehaviour {
 
     public void Hide() {
         sprite.gameObject.SetActive(false);
-
-        trail.gameObject.SetActive(false);
+        spriteLight.gameObject.SetActive(false);
     }
 
     public void Show() {
         sprite.gameObject.SetActive(true);
-
-        trail.gameObject.SetActive(true);
+        spriteLight.gameObject.SetActive(true);
     }
 }

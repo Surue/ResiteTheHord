@@ -159,7 +159,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 1707513042892566, guid: 18854c242bc94f4458767c920470d797, type: 2}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 114277298158628722, guid: 18854c242bc94f4458767c920470d797,
         type: 2}
@@ -298,7 +298,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 1707513042892566, guid: 18854c242bc94f4458767c920470d797, type: 2}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 114407688402436960, guid: 18854c242bc94f4458767c920470d797,
         type: 2}
@@ -543,15 +543,15 @@ Prefab:
       propertyPath: m_RootOrder
       value: 5
       objectReference: {fileID: 0}
-    - target: {fileID: 1713700192830720, guid: ead74f5eae4def348a8f7724f1b30cd0, type: 2}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 114927326674168114, guid: ead74f5eae4def348a8f7724f1b30cd0,
         type: 2}
       propertyPath: mainGoalForEnnemies
       value: 
       objectReference: {fileID: 2002471336}
+    - target: {fileID: 1713700192830720, guid: ead74f5eae4def348a8f7724f1b30cd0, type: 2}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ead74f5eae4def348a8f7724f1b30cd0, type: 2}
   m_IsPrefabAsset: 0
@@ -674,7 +674,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 1707513042892566, guid: 18854c242bc94f4458767c920470d797, type: 2}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 114407688402436960, guid: 18854c242bc94f4458767c920470d797,
         type: 2}

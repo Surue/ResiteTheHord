@@ -15,8 +15,6 @@ public class EnnemyHealth : Health {
 
         if(isServer) {
             NetworkServer.Destroy(gameObject);
-        } else {
-            Destroy(instance);
         }
     }
 }

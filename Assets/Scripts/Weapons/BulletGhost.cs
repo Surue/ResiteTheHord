@@ -18,22 +18,18 @@ public class BulletGhost : MonoBehaviour {
 
     Rigidbody2D body;
 
-    float t = 0;
-
     void Start() {
         body = GetComponent<Rigidbody2D>();
     }
 
     void Update() {
         if (targetBullet != null) {
-            transform.position = Vector2.Lerp(transform.position, targetBullet.transform.position, t);
+            transform.position = Vector2.Lerp(transform.position, targetBullet.transform.position, Time.deltaTime * 20);
 
-            if (Vector2.Distance(transform.position, targetBullet.transform.position) < 0.075f) {
+            if (Vector2.Distance(transform.position, targetBullet.transform.position) < 0.05f) {
                 Destroy(gameObject);
                 targetBullet.Show();
             }
-
-            t += 0.15f;
         } else {
             if (hadTarget) {
                 Destroy(gameObject);
