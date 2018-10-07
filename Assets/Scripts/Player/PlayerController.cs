@@ -220,7 +220,7 @@ public class PlayerController : NetworkBehaviour {
 	        return;
 	    }
 
-        if (!isLocalPlayer && isServer) {
+        if (!isLocalPlayer) {
             return;
         } 
 
@@ -253,12 +253,9 @@ public class PlayerController : NetworkBehaviour {
             timeSinceLastFire = timeBetweenFire;
 
             Vector3 offset = Random.Range(-0.1f, 0.1f) * bulletSpawn.right;
-            int timestamp = NetworkTransport.GetNetworkTimestamp();
 
-            float t = CustomNetworkManager.singleton.client.GetRTT();
-            //CmdFire(bulletSpawn.position + offset, bulletSpawn.rotation, t, GetComponent<NetworkIdentity>());
-            CmdFire(bulletSpawn.position + offset, bulletSpawn.rotation, timestamp, GetComponent<NetworkIdentity>());
-            SpawnGhost(bulletSpawn.position + offset, bulletSpawn.rotation, null, t);
+            CmdFire(bulletSpawn.position + offset, bulletSpawn.rotation, NetworkTransport.GetNetworkTimestamp(), GetComponent<NetworkIdentity>());
+            SpawnGhost(bulletSpawn.position + offset, bulletSpawn.rotation);
 	    }
 
         if (Input.GetKeyDown(KeyCode.Space)) {
@@ -268,7 +265,7 @@ public class PlayerController : NetworkBehaviour {
 	    timeSinceLastFire -= Time.deltaTime;
 	}
 
-    void SpawnGhost(Vector3 pos, Quaternion rot, GameObject target = null, float time = 0 ) {
+    void SpawnGhost(Vector3 pos, Quaternion rot, GameObject target = null) {
         GameObject bullet = Instantiate(ghostBulletPrefab, pos, rot);
 
         Vector2 vel = bullet.transform.up * bulletSpeed; //Compute velocity
@@ -283,11 +280,11 @@ public class PlayerController : NetworkBehaviour {
     void CmdFire(Vector3 pos, Quaternion rot, int time, NetworkIdentity id) {
         byte e;
         int delay;
-        if(isServer) {
-            delay = NetworkTransport.GetRemoteDelayTimeMS(1, connectionToClient.connectionId, time, out e);
+
+        if(id.isLocalPlayer) {
+            delay = (int)(Time.fixedDeltaTime * 1000);
         } else {
-            NetworkConnection conn = CustomNetworkManager.singleton.client.connection;
-            delay = NetworkTransport.GetRemoteDelayTimeMS(1, conn.connectionId, time, out e);
+            delay = NetworkTransport.GetRemoteDelayTimeMS(connectionToClient.hostId, connectionToClient.connectionId, time, out e);
         }
 
         GameObject bullet = Instantiate(bulletPrefab, pos, rot);
@@ -337,58 +334,6 @@ public class PlayerController : NetworkBehaviour {
             }
         }
     }
-
-    //[Command]
-    //void CmdFire(Vector3 pos, Quaternion rot, float time, NetworkIdentity id) {
-    //    GameObject bullet = Instantiate(bulletPrefab, pos, rot);  
-
-    //    Vector2 vel = bullet.transform.up * bulletSpeed; //Compute velocity
-
-    //    RpcDebug(time.ToString());
-
-    //    //Compensate position on server
-    //    bullet.transform.position += ((Vector3)vel * (time / 2000f)); //Compensate position on server with no-collision
-
-    //    LayerMask layerMask = ~((1 << LayerMask.NameToLayer("Bullet")) | (1 << LayerMask.NameToLayer("Player")) | (1 << LayerMask.NameToLayer("Enemy")));
-
-    //    RaycastHit2D hit = Physics2D.Raycast(pos, bullet.transform.up, Vector2.Distance(pos, bullet.transform.position) + 0.2f, layerMask);
-
-    //    if (hit) {
-    //        TargetDestroyGhostBullet(id.connectionToClient);
-
-    //        Destroy(bullet);
-    //    } else {
-    //        LayerMask layerMaskEnemy = 1 << LayerMask.NameToLayer("Enemy");
-
-    //        RaycastHit2D hitEnemy = Physics2D.Raycast(pos, bullet.transform.up, Vector2.Distance(pos, bullet.transform.position) + 0.2f, layerMaskEnemy);
-    //        if (hitEnemy) {
-    //            bullet.GetComponentInChildren<Rigidbody2D>().velocity = vel; //Add velocity
-
-    //            bullet.GetComponent<Bullet>().Initialize(this); //Setup color information
-
-    //            NetworkServer.Spawn(bullet);
-    //            //TargetDestroyGhostBullet(id.connectionToClient);
-    //            Health health = hitEnemy.collider.GetComponent<Health>();
-
-    //            if (health) {
-    //                health.TakeDamage(1, this);
-    //            }
-
-    //            bullet.GetComponent<Bullet>().CmdForceDestroy();
-    //        } else {
-    //            bullet.GetComponentInChildren<Rigidbody2D>().velocity = vel; //Add velocity
-
-    //            bullet.GetComponent<Bullet>().Initialize(this); //Setup color information
-
-    //            NetworkServer.Spawn(bullet);
-
-    //            bullet.GetComponent<Bullet>().RpcCompensatePosition(time, vel); //Compensate position on client
-
-    //            //TargetDestroyGhostBullet(id.connectionToClient);
-    //            RpcSpawnGhostBullet(bullet);
-    //        }
-    //    }
-    //}
 
     [ClientRpc]
     void RpcDebug(string s) {
