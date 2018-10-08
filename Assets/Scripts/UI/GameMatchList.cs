@@ -96,7 +96,7 @@ public class GameMatchList : MonoBehaviour {
                 if(!stillExisting) {
                     JoinPanel toDestroy;
                     matchesButtons.TryGetValue(matchesButtonsKey, out toDestroy);
-                    Debug.Log("DestroyMatch");
+                    
                     toDestroy.Disparition();
                     matchesButtons.Remove(matchesButtonsKey);
                     finished = false;

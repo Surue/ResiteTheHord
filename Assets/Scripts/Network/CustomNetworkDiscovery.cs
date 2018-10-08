@@ -11,10 +11,13 @@ public struct LanConnectionInfo {
 
     public LanConnectionInfo(string fromAddress, string data) {
         ipAddress = fromAddress.Substring(fromAddress.LastIndexOf(":") + 1, fromAddress.Length - (fromAddress.LastIndexOf(":") + 1));
-        string portText = data.Substring(data.LastIndexOf(":") + 1, data.Length - (data.LastIndexOf(":") + 1));
+        //string portText = data.Substring(data.LastIndexOf(":") + 1, data.Length - (data.LastIndexOf(":") + 1));
+        string portText = data.Substring(data.IndexOf("localhost:") + 10, data.IndexOf("|") - (data.IndexOf("localhost:") + 10));
         port = 7777;
+
         int.TryParse(portText, out port);
-        name = "local";
+
+        name = data.Substring(data.IndexOf("serverName:") + 11, data.Length - (data.IndexOf("serverName:") + 11));
     }
 }
 
@@ -60,10 +63,15 @@ public class CustomNetworkDiscovery : NetworkDiscovery {
         }
     }
 
-    public void StartBroadcast() {
+    public void StartBroadcast(string serverName) {
         StopBroadcast();
+        
+
         base.Initialize();
+        broadcastData += "|serverName:" + serverName;
         base.StartAsServer();
+
+        Debug.Log(broadcastData);
     }
 
     public override void OnReceivedBroadcast(string fromAddress, string data) {

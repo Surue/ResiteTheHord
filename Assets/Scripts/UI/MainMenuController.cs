@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -25,11 +26,42 @@ public class MainMenuController : MonoBehaviour {
     }
 
     public void StartLan() {
-        FindObjectOfType<CustomNetworkManager>().StartLan();
+        string serverName = GetServerName();
+
+        if(serverName != "") {
+            FindObjectOfType<CustomNetworkManager>().StartLan(serverName);
+        } else {
+            FindObjectOfType<CustomNetworkManager>().StartLan();
+        }
+    }
+
+    string GetServerName() {
+        string serverName = "";
+
+        GameObject serverNameUI = GameObject.Find("ServerNameText");
+
+        if(serverNameUI != null) {
+            if(serverNameUI.GetComponent<TextMeshProUGUI>()) {
+                serverName = serverNameUI.GetComponent<TextMeshProUGUI>().text;
+            } else {
+                Debug.Log(serverNameUI.name + " doesn't contain any text information");
+            }
+        } else {
+            Debug.LogWarning("The object containing the server name in not in the scene");
+        }
+
+        return serverName;
     }
 
     public void StartMatch() {
-        FindObjectOfType<CustomNetworkManager>().StartHosting();
+        string serverName = GetServerName();
+
+        if (serverName != "") {
+            FindObjectOfType<CustomNetworkManager>().StartHosting(serverName);
+        }
+        else {
+            FindObjectOfType<CustomNetworkManager>().StartHosting();
+        }
     }
 
     public void Shutdown() {

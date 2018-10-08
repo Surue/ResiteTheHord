@@ -26,16 +26,16 @@ public class CustomNetworkManager:NetworkManager {
     bool isClient = false;
     bool isServer = false;
 
-    public void StartHosting() {
+    public void StartHosting(string serverName = "Online Match") {
         isServer = true;
         StartMatchMaker();
-        matchMaker.CreateMatch("Match", 4, true, "", "", "", 0, 0, OnMatchCreated);
+        matchMaker.CreateMatch(serverName, 4, true, "", "", "", 0, 0, OnMatchCreated);
     }
 
-    public void StartLan() {
+    public void StartLan(string serverName = "Local Match") {
         isServer = true;
         base.StartHost();
-        discovery.StartBroadcast();
+        discovery.StartBroadcast(serverName);
     }
 
     public void JoinLan() {
