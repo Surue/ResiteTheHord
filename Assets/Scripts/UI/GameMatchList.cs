@@ -1,10 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Networking.Match;
 
 public class GameMatchList : MonoBehaviour {
+
+    [SerializeField] TextMeshProUGUI placeHolderText;
 
     [SerializeField]
     JoinPanel joinPanelPrefab;
@@ -15,6 +18,10 @@ public class GameMatchList : MonoBehaviour {
     void Start() {
         AvailableMatchesList.OnAvailableMatchesChanged += AvailableMatchesList_OnAvailableMatchesChanged;
         AvailableMatchesList.OnAvailableLanChanged += AvailableMatchesList_OnAvailableLanChanged;
+
+        if (matchesButtons.Count == 0 && lanButtons.Count == 0) {
+            placeHolderText.gameObject.SetActive(true);
+        }
     }
 
     void OnDestroy() {
@@ -33,15 +40,21 @@ public class GameMatchList : MonoBehaviour {
     void UpdateButton(List<MatchInfoSnapshot> matches, List<LanConnectionInfo> lan) {
         bool shouldMoveUp = false;
 
+        if(matches.Count != 0 || lan.Count != 0) {
+            placeHolderText.gameObject.SetActive(false);
+        } else {
+            placeHolderText.gameObject.SetActive(true);
+        }
+
         //Destroy unused button lan
-        bool finised = true;
+        bool finished = true;
         do {
-            finised = true;
+            finished = true;
             foreach(KeyValuePair<LanConnectionInfo, JoinPanel> keyValuePair in lanButtons) {
                 if(!lan.Contains(keyValuePair.Key)) {
                     keyValuePair.Value.Disparition();
                     lanButtons.Remove(keyValuePair.Key);
-                    finised = false;
+                    finished = false;
                     shouldMoveUp = true;
                     break;
                 } else {
@@ -50,30 +63,34 @@ public class GameMatchList : MonoBehaviour {
                     }
                 }
             }
-        } while (!finised);
+        } while (!finished);
 
         //Build new button for lan
         foreach(LanConnectionInfo l in lan) {
             //Look if need to build new button
-            if(!lanButtons.ContainsKey(l)) {
-                JoinPanel button = Instantiate(joinPanelPrefab);
-                button.Initialize(l, transform);
-
-                lanButtons.Add(l, button);
+            if (lanButtons.ContainsKey(l)) {
+                continue;
             }
+
+            JoinPanel button = Instantiate(joinPanelPrefab);
+            button.Initialize(l, transform);
+
+            lanButtons.Add(l, button);
         }
 
         //Destroy unused button matches
         do {
-            finised = true;
+            finished = true;
             foreach(MatchInfoSnapshot matchesButtonsKey in matchesButtons.Keys) {
                 bool stillExisting = false;
 
                 foreach(MatchInfoSnapshot matchInfoSnapshot in matches) {
-                    if(matchInfoSnapshot.hostNodeId == matchesButtonsKey.hostNodeId) {
-                        stillExisting = true;
-                        break;
+                    if (matchInfoSnapshot.hostNodeId != matchesButtonsKey.hostNodeId) {
+                        continue;
                     }
+
+                    stillExisting = true;
+                    break;
                 }
 
                 if(!stillExisting) {
@@ -82,17 +99,19 @@ public class GameMatchList : MonoBehaviour {
                     Debug.Log("DestroyMatch");
                     toDestroy.Disparition();
                     matchesButtons.Remove(matchesButtonsKey);
-                    finised = false;
+                    finished = false;
                     break;
                 } else {
-                    if (shouldMoveUp) {
-                        JoinPanel toMoveUp;
-                        matchesButtons.TryGetValue(matchesButtonsKey, out toMoveUp);
-                        toMoveUp.MoveUp();
+                    if (!shouldMoveUp) {
+                        continue;
                     }
+
+                    JoinPanel toMoveUp;
+                    matchesButtons.TryGetValue(matchesButtonsKey, out toMoveUp);
+                    toMoveUp.MoveUp();
                 }
             }
-        } while(!finised);
+        } while(!finished);
 
         //Build new button for matches
         foreach(MatchInfoSnapshot match in matches) {
@@ -104,33 +123,16 @@ public class GameMatchList : MonoBehaviour {
                 }
             }
 
-            if (!alreadyExisting) {
-                JoinPanel button = Instantiate(joinPanelPrefab);
-                button.Initialize(match, transform);
-
-                matchesButtons.Add(match, button);
+            if (alreadyExisting) {
+                continue;
             }
+
+            JoinPanel button = Instantiate(joinPanelPrefab);
+            button.Initialize(match, transform);
+
+            matchesButtons.Add(match, button);
         }
 
         
-    }
-
-    void ClearExistingButton() {
-        JoinPanel[] buttons = GetComponentsInChildren<JoinPanel>();
-        foreach(JoinPanel button in buttons) {
-            Destroy(button.gameObject);
-        }
-    }
-
-    void CreateNewJoinGameButtons(List<MatchInfoSnapshot> matches, List<LanConnectionInfo> lan) {
-        foreach(LanConnectionInfo l in lan) {
-            JoinPanel button = Instantiate(joinPanelPrefab);
-            button.Initialize(l, transform);
-        }
-
-        foreach(MatchInfoSnapshot match in matches) {
-            JoinPanel button = Instantiate(joinPanelPrefab);
-            button.Initialize(match, transform);
-        }
     }
 }

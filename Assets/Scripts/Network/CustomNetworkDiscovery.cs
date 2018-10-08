@@ -28,8 +28,16 @@ public class CustomNetworkDiscovery : NetworkDiscovery {
 
     void Awake() {
         base.Initialize();
-        base.StartAsClient();
+        if (!base.StartAsClient()) {
+            StartCoroutine(ReconnectDiscovery());
+        }
         StartCoroutine(CleanupExpireEntries());
+    }
+
+    IEnumerator ReconnectDiscovery() {
+        while (!base.StartAsClient()) {
+            yield return new WaitForFixedUpdate();
+        }
     }
 
     IEnumerator CleanupExpireEntries() {
