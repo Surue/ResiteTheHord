@@ -9,32 +9,30 @@ Prefab:
     m_Modifications: []
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 0}
-  m_RootGameObject: {fileID: 1812391930324932}
+  m_RootGameObject: {fileID: 1727699320566172}
   m_IsPrefabAsset: 1
---- !u!1 &1812391930324932
+--- !u!1 &1727699320566172
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 4247927079184186}
-  - component: {fileID: 114450123715630890}
-  - component: {fileID: 114090180000654342}
-  - component: {fileID: 114753062818598922}
+  - component: {fileID: 4430807491377830}
+  - component: {fileID: 114901279691559692}
   m_Layer: 0
-  m_Name: NetworkManager
+  m_Name: SoloNetworkManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &4247927079184186
+--- !u!4 &4430807491377830
 Transform:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1812391930324932}
+  m_GameObject: {fileID: 1727699320566172}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -42,34 +40,12 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &114090180000654342
+--- !u!114 &114901279691559692
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1812391930324932}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6539a63f7fccbed46b48e770135c3def, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_BroadcastPort: 47777
-  m_BroadcastKey: 2222
-  m_BroadcastVersion: 1
-  m_BroadcastSubVersion: 1
-  m_BroadcastInterval: 1000
-  m_UseNetworkManager: 1
-  m_BroadcastData: HELLO
-  m_ShowGUI: 0
-  m_OffsetX: 0
-  m_OffsetY: 0
-  ip: 
---- !u!114 &114450123715630890
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1812391930324932}
+  m_GameObject: {fileID: 1727699320566172}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 606214f03327d8b4c9ee26972481ab53, type: 3}
@@ -88,13 +64,11 @@ MonoBehaviour:
     type: 2}
   m_AutoCreatePlayer: 1
   m_PlayerSpawnMethod: 0
-  m_OfflineScene: MultiplayerMatches
-  m_OnlineScene: Lobby
+  m_OfflineScene: MainMenu
+  m_OnlineScene: SoloLevel
   m_SpawnPrefabs:
   - {fileID: 1137613874173276, guid: 6e807e86331eb9e459dc31cc0b972ca0, type: 2}
-  - {fileID: 1517206953804602, guid: 252847d3c77e4b04b996c6db24bdb909, type: 2}
-  - {fileID: 1358923401875184, guid: cdfbbb1c9dbcba945abebfa8403e8c05, type: 2}
-  - {fileID: 1230865007041762, guid: 1d36a0ed518f52e47afe11cb1e3ac2d1, type: 2}
+  - {fileID: 1013236632694570, guid: abe5f0ac868f2aa4294179eb160d404d, type: 2}
   - {fileID: 1477025376209220, guid: 706b6f9158a369d4ca06df8d616ab15c, type: 2}
   m_CustomConfig: 0
   m_MaxConnections: 4
@@ -138,10 +112,10 @@ MonoBehaviour:
     m_MaxTimerTimeout: 12000
     m_MinNetSimulatorTimeout: 1
     m_MaxNetSimulatorTimeout: 12000
-  m_Channels: 0500000000000000
+  m_Channels: 
   m_UseWebSockets: 0
   m_UseSimulator: 0
-  m_SimulatedLatency: 50
+  m_SimulatedLatency: 1
   m_PacketLossPercentage: 0
   m_MaxBufferedPackets: 16
   m_AllowFragmentation: 1
@@ -151,21 +125,7 @@ MonoBehaviour:
   matchSize: 4
   isNetworkActive: 0
   matchMaker: {fileID: 0}
-  discovery: {fileID: 114090180000654342}
+  discovery: {fileID: 0}
   lobbyPlayerPrefab: {fileID: 1477025376209220, guid: 706b6f9158a369d4ca06df8d616ab15c,
     type: 2}
---- !u!114 &114753062818598922
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1812391930324932}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 1180575928, guid: dc443db3e92b4983b9738c1131f555cb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_HostMigration: 1
-  m_ShowGUI: 1
-  m_OffsetX: 10
-  m_OffsetY: 300
+  forceSoloMode: 1

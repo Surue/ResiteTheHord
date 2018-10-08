@@ -15,6 +15,8 @@ public class CustomNetworkManager:NetworkManager {
 
     public GameObject lobbyPlayerPrefab;
 
+    public bool forceSoloMode = false;
+
     enum State {
         MATCH_MAKING,
         LOBBY,
@@ -163,5 +165,11 @@ public class CustomNetworkManager:NetworkManager {
 
         discovery.Initialize();
         discovery.StartAsClient();
+    }
+
+    public void LoadSoloMode() {
+        isServer = true;
+        base.StartHost();
+        forceSoloMode = false;
     }
 }
