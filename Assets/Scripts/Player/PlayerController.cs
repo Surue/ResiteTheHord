@@ -258,8 +258,8 @@ public class PlayerController : NetworkBehaviour {
             SpawnGhost(bulletSpawn.position + offset, bulletSpawn.rotation);
 	    }
 
-        if (Input.GetKeyDown(KeyCode.Space)) {
-            Time.timeScale = 0.5f;
+        if (Input.GetKeyDown(KeyCode.Escape)) {
+            FindObjectOfType<MainMenuController>().ToggleMenuPause();
         }
 
 	    timeSinceLastFire -= Time.deltaTime;

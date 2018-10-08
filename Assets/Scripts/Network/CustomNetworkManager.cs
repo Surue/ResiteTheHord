@@ -150,9 +150,7 @@ public class CustomNetworkManager:NetworkManager {
 
             StopHost();
             isClient = false;
-        }
-
-        if (isClient) {
+        }else if (isClient) {
             StopClient();
             isClient = false;
         }

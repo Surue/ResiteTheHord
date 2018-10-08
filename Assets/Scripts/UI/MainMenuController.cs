@@ -6,6 +6,18 @@ using UnityEngine.SceneManagement;
 
 public class MainMenuController : MonoBehaviour {
 
+    PauseMenu pauseMenu;
+
+    // Use this for initialization
+    void Start() {
+        pauseMenu = FindObjectOfType<PauseMenu>();
+        if(!pauseMenu) {
+            Debug.LogWarning("The pause menu hasn't been found and can be missing from the scene");
+        } else {
+            pauseMenu.Hide();
+        }
+    }
+
     public void LoadSceneByName(string name) {
         SceneManager.LoadScene(name);
     }
@@ -70,5 +82,13 @@ public class MainMenuController : MonoBehaviour {
         CustomNetworkManager.Shutdown();
 
         LoadSceneByName("MainMenu");
+    }
+
+    public void ToggleMenuPause() {
+        if(pauseMenu.gameObject.activeSelf) {
+            pauseMenu.Hide();
+        } else {
+            pauseMenu.Show();
+        }
     }
 }
