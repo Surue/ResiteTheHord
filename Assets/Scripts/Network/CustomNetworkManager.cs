@@ -128,7 +128,7 @@ public class CustomNetworkManager:NetworkManager {
     }
 
     public override void OnServerAddPlayer(NetworkConnection conn, short playerControllerId) {
-        if (networkSceneName == "Lobby") {
+        if (networkSceneName == "Lobby" || networkSceneName == "LobbyConnected") {
             GameObject instance = Instantiate(lobbyPlayerPrefab);
             NetworkServer.AddPlayerForConnection(conn, instance, playerControllerId);
         } else {

@@ -398,6 +398,11 @@ Prefab:
       propertyPath: healthBar
       value: 
       objectReference: {fileID: 821898031}
+    - target: {fileID: 114764256751352108, guid: 7f1bcee32fe138f44b77b5a8232ca11e,
+        type: 2}
+      propertyPath: currentHealth
+      value: 100
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7f1bcee32fe138f44b77b5a8232ca11e, type: 2}
   m_IsPrefabAsset: 0
@@ -820,13 +825,18 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 1713700192830720, guid: ead74f5eae4def348a8f7724f1b30cd0, type: 2}
       propertyPath: m_Name
-      value: GameManager (1)
+      value: GameManager
       objectReference: {fileID: 0}
     - target: {fileID: 114927326674168114, guid: ead74f5eae4def348a8f7724f1b30cd0,
         type: 2}
       propertyPath: mainGoalForEnnemies
       value: 
       objectReference: {fileID: 1408680672}
+    - target: {fileID: 114927326674168114, guid: ead74f5eae4def348a8f7724f1b30cd0,
+        type: 2}
+      propertyPath: sceneWhenCoreDestroyed
+      value: DeathScreenSolo
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ead74f5eae4def348a8f7724f1b30cd0, type: 2}
   m_IsPrefabAsset: 0

@@ -23,6 +23,10 @@ public class GameManager : NetworkBehaviour {
     //Life system
     List<GameObject> playersWaitingToRespawn = new List<GameObject>();
 
+    //Scene when died
+    [SerializeField]
+    string sceneWhenCoreDestroyed;
+
     enum State {
         INTRO,
         INITIALIZE,
@@ -119,7 +123,7 @@ public class GameManager : NetworkBehaviour {
     }
 
     public void OnMainCoreDestroyed() {
-        Debug.Log("Main core destroyed");
+        CustomNetworkManager.singleton.ServerChangeScene(sceneWhenCoreDestroyed);
     }
 
     public void FinishedSpawn() {

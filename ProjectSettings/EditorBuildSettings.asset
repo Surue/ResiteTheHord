@@ -29,4 +29,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Levels/SoloLevel.unity
     guid: 48f1eeff564fad3458cb9c1cc3b5ff20
+  - enabled: 1
+    path: Assets/Scenes/Menus/LobbyConnected.unity
+    guid: 60c53d7a5c8040f42a3821380519a91a
+  - enabled: 1
+    path: Assets/Scenes/Menus/DeathScreenSolo.unity
+    guid: 98d8d892387de0f41b6a1038852c2fb4
   m_configObjects: {}

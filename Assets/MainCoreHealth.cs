@@ -18,8 +18,6 @@ public class MainCoreHealth : Health {
             FindObjectOfType<GameManager>().OnMainCoreDestroyed();
             NetworkServer.Destroy(gameObject);
         }
-
-        Destroy(gameObject);
     }
 
     [ClientRpc]
