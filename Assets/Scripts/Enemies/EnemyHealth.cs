@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
-using Debug = UnityEngine.Debug;
 
-public class EnnemyHealth : Health {
+public class EnemyHealth : Health {
 
     [ClientRpc]
     public override void RpcDestroy() {
@@ -15,8 +14,6 @@ public class EnnemyHealth : Health {
 
         if(isServer) {
             NetworkServer.Destroy(gameObject);
-        } else {
-            Destroy(instance);
         }
     }
 }

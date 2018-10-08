@@ -16,13 +16,7 @@ public class BulletGhost : MonoBehaviour {
 
     bool hadTarget = false;
 
-    Rigidbody2D body;
-
     float t = 0;
-
-    void Start() {
-        body = GetComponent<Rigidbody2D>();
-    }
 
     void Update() {
         if (targetBullet != null) {

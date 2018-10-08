@@ -69,7 +69,7 @@ public class Bullet : NetworkBehaviour {
             health.TakeDamage(1);
         }
 
-        EnnemyHealth enemy = hit.GetComponent<EnnemyHealth>();
+        EnemyHealth enemy = hit.GetComponent<EnemyHealth>();
 
         if (enemy != null) {
             enemy.TakeDamage(1, owner);

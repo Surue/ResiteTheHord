@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -52,11 +53,6 @@ public class EnemyMovement : NetworkBehaviour {
     State state = State.INITIALIZE;
     #endregion 
 
-    #region Network
-
-    bool _isClient;
-    #endregion
-
     #region Debug
     [Header("Debug")]
     [SerializeField]bool showSyncPosition = false;
@@ -66,12 +62,6 @@ public class EnemyMovement : NetworkBehaviour {
     void Start () {
         body = GetComponent<Rigidbody2D>();
         pathFinder = FindObjectOfType<PathFinding>();
-
-        if (isClient) {
-            _isClient = true;
-        } else {
-            _isClient = false;
-        }
 	}
 
     public static Vector2 Rotate(Vector2 v, float degrees) {
@@ -174,71 +164,76 @@ public class EnemyMovement : NetworkBehaviour {
 	        transform.position = Vector2.Lerp(transform.position, extrapolatedPosition, Time.deltaTime * speed * 5);
         }
 
-        if(isServer) {
-            targetPosition = transform.position;
+        if (!isServer) {
+            return;
+        }
 
-            switch(state) {
-                case State.INITIALIZE:
+        targetPosition = transform.position;
+
+        switch(state) {
+            case State.INITIALIZE:
+                state = State.IDLE;
+                break;
+
+            case State.IDLE:
+                path.Clear();
+                path = pathFinder.GetPathFromTo(transform, mainGoal);
+                state = State.MOVE_TO_BASE;
+                break;
+
+            case State.MOVE_TO_BASE:
+                if(path == null || path.Count == 0) {
                     state = State.IDLE;
-                    break;
+                } else {
+                    if(Vector2.Distance((Vector3)transform.position, path[0]) < 0.1f) {
+                        path.RemoveAt(0);
 
-                case State.IDLE:
-                    path.Clear();
-                    path = pathFinder.GetPathFromTo(transform, mainGoal);
-                    state = State.MOVE_TO_BASE;
-                    break;
-
-                case State.MOVE_TO_BASE:
-                    if(path == null || path.Count == 0) {
-                        state = State.IDLE;
-                    } else {
-                        if(Vector2.Distance((Vector3)transform.position, path[0]) < 0.1f) {
-                            path.RemoveAt(0);
-
-                            if(path.Count == 0) {
-                                state = State.IDLE;
-                            } else {
-                                targetPosition = path[0];
-                            }
+                        if(path.Count == 0) {
+                            state = State.IDLE;
                         } else {
                             targetPosition = path[0];
                         }
-                    }
-
-                    if(timerCheckPath > timeBetweenPathChecking) {
-                        timerCheckPath = 0;
-                        state = State.IDLE;
                     } else {
-                        timerCheckPath += Time.deltaTime;
+                        targetPosition = path[0];
                     }
-                    break;
+                }
 
-                case State.MOVE_TO_TARGET:
-                    break;
+                if(timerCheckPath > timeBetweenPathChecking) {
+                    timerCheckPath = 0;
+                    state = State.IDLE;
+                } else {
+                    timerCheckPath += Time.deltaTime;
+                }
+                break;
 
-                case State.STOPPED:
-                    timerStop -= Time.deltaTime;
+            case State.MOVE_TO_TARGET:
+                break;
 
-                    if (timerStop <= 0) {
-                        state = State.IDLE;
-                        timerStop = 0;
-                    }
-                    break;
-            }  
+            case State.STOPPED:
+                timerStop -= Time.deltaTime;
+
+                if (timerStop <= 0) {
+                    state = State.IDLE;
+                    timerStop = 0;
+                }
+                break;
+
+            default:
+                break;
         }
     }
 
     [Command]
     void CmdUpdatePosition() {
         if(path == null || path.Count == 0 || state == State.STOPPED) {
-            RpcUpdatePosition(transform.position, transform.position);
+            RpcUpdatePosition(transform.position, transform.position, NetworkTransport.GetNetworkTimestamp());
         } else {
-            RpcUpdatePosition(transform.position, path[0]);
+            RpcUpdatePosition(transform.position, path[0], NetworkTransport.GetNetworkTimestamp());
         }
     }
 
     [ClientRpc]
-    void RpcUpdatePosition(Vector3 lastPosition, Vector3 nextPos) {
+    void RpcUpdatePosition(Vector3 lastPosition, Vector3 nextPos, int time) {
         nextNetworkedTransform = new NetworkedTransform {
             posX = lastPosition.x,
             posY = lastPosition.y
@@ -252,29 +247,40 @@ public class EnemyMovement : NetworkBehaviour {
             return;
         }
 
+        NetworkConnection conn = CustomNetworkManager.singleton.client.connection;
+
+        byte e;
+        int delay;
+
+        if(!isServer) {
+            delay = NetworkTransport.GetRemoteDelayTimeMS(conn.hostId, conn.connectionId, time, out e);
+        } else {
+            delay = (int)(Time.fixedDeltaTime * 1000);
+        }
+
         if(Mathf.Abs(lastPosition.x - nextPos.x) < 0.1f) { //Vertical movement
             if(lastPosition.y > nextPos.y) {
-                extrapolatedPosition += Vector3.down * speed * (Time.fixedDeltaTime + (CustomNetworkManager.singleton.client.GetRTT() / 2000f));
+                extrapolatedPosition += Vector3.down * speed * (delay / 1000f);
             } else {
-                extrapolatedPosition += Vector3.up * speed * (Time.fixedDeltaTime + (CustomNetworkManager.singleton.client.GetRTT() / 2000f));
+                extrapolatedPosition += Vector3.up * speed * (delay / 1000f);
             }
         } else if(Mathf.Abs(lastPosition.y - nextPos.y) < 0.1f) { //Horizontal movement
             if(lastPosition.x > nextPos.x) {
-                extrapolatedPosition += Vector3.left * speed * (Time.fixedDeltaTime + (CustomNetworkManager.singleton.client.GetRTT() / 2000f));
+                extrapolatedPosition += Vector3.left * speed * (delay / 1000f);
             } else {
-                extrapolatedPosition += Vector3.right * speed * (Time.fixedDeltaTime + (CustomNetworkManager.singleton.client.GetRTT() / 2000f));
+                extrapolatedPosition += Vector3.right * speed * (delay / 1000f);
             }
         } else {
             if(lastPosition.y > nextPos.y) {
-                extrapolatedPosition += Vector3.down * speed * (Time.fixedDeltaTime + (CustomNetworkManager.singleton.client.GetRTT() / 2000f));
+                extrapolatedPosition += Vector3.down * speed * (delay / 1000f);
             } else {
-                extrapolatedPosition += Vector3.up * speed * (Time.fixedDeltaTime + (CustomNetworkManager.singleton.client.GetRTT() / 2000f));
+                extrapolatedPosition += Vector3.up * speed * (delay / 1000f);
             }
 
             if(lastPosition.x > nextPos.x) {
-                extrapolatedPosition += Vector3.left * speed * (Time.fixedDeltaTime + (CustomNetworkManager.singleton.client.GetRTT() / 2000f));
+                extrapolatedPosition += Vector3.left * speed * (delay / 1000f);
             } else {
-                extrapolatedPosition += Vector3.right * speed * (Time.fixedDeltaTime + (CustomNetworkManager.singleton.client.GetRTT() / 2000f));
+                extrapolatedPosition += Vector3.right * speed * (delay / 1000f);
             }
         }
     }
@@ -292,11 +298,13 @@ public class EnemyMovement : NetworkBehaviour {
     }
 
     void OnDrawGizmos() {
-        if(path != null) {
-            foreach(Vector2 pos in path) {
-                Gizmos.color = Color.blue;
-                Gizmos.DrawWireSphere(new Vector3(pos.x, pos.y, 0), 0.1f);
-            }
+        if (path == null) {
+            return;
+        }
+
+        foreach(Vector2 pos in path) {
+            Gizmos.color = Color.blue;
+            Gizmos.DrawWireSphere(new Vector3(pos.x, pos.y, 0), 0.1f);
         }
     }
 
