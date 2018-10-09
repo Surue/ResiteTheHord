@@ -37,6 +37,7 @@ public class PlayerController : NetworkBehaviour {
     #region Variables
     //Visual
     [SyncVar(hook = "OnColorChanged")] Color color = Color.black;
+    CameraShaking cameraShaking;
 
     //Weapon
     [Header("Weapon")]
@@ -70,6 +71,8 @@ public class PlayerController : NetworkBehaviour {
 	        FindObjectOfType<cameraController>().focusedObject = gameObject;
 
 	        PlayerInfo tmp = FindObjectOfType<PlayerInfo>();
+
+	        cameraShaking = FindObjectOfType<CameraShaking>();
 
 	        if (tmp) {
 	            CmdSetColor(tmp.GetColor());
@@ -256,13 +259,15 @@ public class PlayerController : NetworkBehaviour {
 
             CmdFire(bulletSpawn.position + offset, bulletSpawn.rotation, NetworkTransport.GetNetworkTimestamp(), GetComponent<NetworkIdentity>());
             SpawnGhost(bulletSpawn.position + offset, bulletSpawn.rotation);
+
+            cameraShaking.Shake(0.005f, timeBetweenFire);
 	    }
 
         if (Input.GetKeyDown(KeyCode.Escape)) {
             FindObjectOfType<MainMenuController>().ToggleMenuPause();
         }
 
-	    timeSinceLastFire -= Time.deltaTime;
+        timeSinceLastFire -= Time.deltaTime;
 	}
 
     void SpawnGhost(Vector3 pos, Quaternion rot, GameObject target = null) {

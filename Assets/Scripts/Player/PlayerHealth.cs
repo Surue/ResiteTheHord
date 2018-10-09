@@ -7,21 +7,22 @@ public class PlayerHealth : Health {
 
     public RectTransform healthBar;
 
+    CameraShaking cameraShaking;
+
     // Use this for initialization
     void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+        cameraShaking = FindObjectOfType<CameraShaking>();
+    }
 
     [ClientRpc]
     public override void RpcOnHealthChanged(int health) {
         currentHealth = health;
 
         healthBar.sizeDelta = new Vector2(health, healthBar.sizeDelta.y);
+
+        if (isLocalPlayer) {
+            cameraShaking.Shake(0.09f, 0.1f);
+        }
     }
 
     [ClientRpc]
