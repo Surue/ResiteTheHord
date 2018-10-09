@@ -30,6 +30,8 @@ public class MapController:MonoBehaviour {
                 tiles[x, y] = mapTiles[x, y];
             }
         }
+
+        DrawAll();
     }
 
     public void SetTiles() {
@@ -52,14 +54,6 @@ public class MapController:MonoBehaviour {
         FindObjectOfType<NavigationAI>().GenerateNavigationGraph(tiles, new Vector2Int(Mathf.Abs(solidTilemap.cellBounds.x), Mathf.Abs(solidTilemap.cellBounds.y + 1)));
     }
 
-    public MapTile GetTile(Vector2Int pos) {
-        if(pos.x >= 0 && pos.x < tiles.GetLength(0) && pos.y >= 0 && pos.y < tiles.GetLength(1)) {
-            return tiles[pos.x, pos.y];
-        }
-
-        return null;
-    }
-
     public void AttackTile(MapTile t, float damage) {
         if(t.Attack(damage)) {
             UpdateTile(t);
@@ -69,15 +63,15 @@ public class MapController:MonoBehaviour {
     void UpdateTile(MapTile t) {
         FindObjectOfType<NavigationAI>().GenerateNavigationGraph(tiles, new Vector2Int(Mathf.Abs(solidTilemap.cellBounds.x), Mathf.Abs(solidTilemap.cellBounds.y)));
     }
-    
-    Vector2Int Transform2TilePos(Transform pos) {
-        int x = 0;
-        int y = 0;
 
-        x = Mathf.FloorToInt(pos.position.x);
-        y = Mathf.FloorToInt(pos.position.y);
+    public void DrawAll() {
+        foreach(MapTile tile in tiles) {
+            Vector3Int pos = new Vector3Int(tile.position.x, tile.position.y, 0);
+            solidTilemap.SetTile(pos, tile.solidTile);
+            groundTilemap.SetTile(pos, tile.groundTile);
+        }
 
-        return new Vector2Int(x, y);
+        solidTilemap.GetComponent<CompositeCollider2D>().GenerateGeometry();
     }
 
     //WRONG
@@ -99,8 +93,7 @@ public class MapTile {
     public enum TileType {
         FREE,
         SOLID,
-        INVULNERABLE,
-        ANY //Used to draw them
+        INVULNERABLE
     }
 
     public TileType type;
@@ -109,9 +102,8 @@ public class MapTile {
 
     public float cost = 1;
 
-    public Tile tile;
-    public Tile groundTile;
-    public Tile decalTile;
+    public TileBase solidTile;
+    public TileBase groundTile;
 
     public int score = 5;
 
@@ -124,19 +116,6 @@ public class MapTile {
     public MapTile(Vector2Int pos, bool solid) {
         position = pos;
         isSolid = solid;
-
-        if(isSolid) {
-            lifePoint = 1000;
-        }
-    }
-
-    public MapTile(MapTile t) {
-        position = t.position;
-        isSolid = t.isSolid;
-        cost = t.cost;
-        tile = t.tile;
-        score = t.score;
-        type = t.type;
 
         if(isSolid) {
             lifePoint = 1000;
@@ -174,9 +153,7 @@ public class MapTile {
         if(lifePoint <= 0) {
             SetType(TileType.FREE);
 
-            decalTile = null;
-
-            tile = null;
+            solidTile = null;
 
             return true;
         } else {
