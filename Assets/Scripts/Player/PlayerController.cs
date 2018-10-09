@@ -66,6 +66,7 @@ public class PlayerController : NetworkBehaviour {
     //Use this for initialization
     void Start () {
 	    GetComponentInChildren<SpriteRenderer>().color = color;
+        GetComponentInChildren<PlayerCursor>().GetComponent<SpriteRenderer>().color = color;
 
 	    if (isLocalPlayer) {
 	        FindObjectOfType<cameraController>().focusedObject = gameObject;
@@ -77,8 +78,13 @@ public class PlayerController : NetworkBehaviour {
 	        if (tmp) {
 	            CmdSetColor(tmp.GetColor());
 	            CmdSetName(tmp.GetName());
+
+	            GetComponentInChildren<PlayerCursor>().GetComponent<SpriteRenderer>().color = tmp.GetColor();
             }
-	    }
+        }
+	    else {
+	        GetComponentInChildren<PlayerCursor>().gameObject.SetActive(false);
+        }
 
 	    body = GetComponent<Rigidbody2D>();
 
