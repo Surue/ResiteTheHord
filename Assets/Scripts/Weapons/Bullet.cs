@@ -115,7 +115,7 @@ public class Bullet : NetworkBehaviour {
         if(!isServer) {
             delay = NetworkTransport.GetRemoteDelayTimeMS(conn.hostId, conn.connectionId, time, out e);
         } else {
-            delay = (int)(Time.fixedDeltaTime * 1000);
+            delay = 0;
         }
         
         transform.position += (Vector3)(vel * (delay / 1000f));

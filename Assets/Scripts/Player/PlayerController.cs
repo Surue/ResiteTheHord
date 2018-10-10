@@ -68,7 +68,16 @@ public class PlayerController : NetworkBehaviour {
 	    GetComponentInChildren<SpriteRenderer>().color = color;
         GetComponentInChildren<PlayerCursor>().GetComponent<SpriteRenderer>().color = color;
 
-	    if (isLocalPlayer) {
+        body = GetComponent<Rigidbody2D>();
+
+        if (isServer) {
+            if(FindObjectOfType<GameManager>()) {
+                FindObjectOfType<GameManager>().CmdOnClientConnected(GetComponent<NetworkIdentity>());
+            }
+        }
+
+
+        if (isLocalPlayer) {
 	        FindObjectOfType<cameraController>().focusedObject = gameObject;
 
 	        PlayerInfo tmp = FindObjectOfType<PlayerInfo>();
@@ -81,12 +90,10 @@ public class PlayerController : NetworkBehaviour {
 
 	            GetComponentInChildren<PlayerCursor>().GetComponent<SpriteRenderer>().color = tmp.GetColor();
             }
-        }
+	    }
 	    else {
 	        GetComponentInChildren<PlayerCursor>().gameObject.SetActive(false);
         }
-
-	    body = GetComponent<Rigidbody2D>();
 
         for (int i = 0; i < 10; i++) {
             lastPositions[i] = transform.position;
@@ -98,11 +105,12 @@ public class PlayerController : NetworkBehaviour {
             return;
         }
 
+        movement = new Vector3(Mathf.Clamp(movement.x, -1, 1), Mathf.Clamp(movement.y, -1, 1));
         movement = new Vector3(movement.x * speed, movement.y * speed);
 
         body.velocity = movement;
 
-        CmdSetTransform(GetCurrentNetworkedTransform(), CustomNetworkManager.singleton.client.GetRTT());
+        CmdSetTransform(GetCurrentNetworkedTransform(), NetworkTransport.GetNetworkTimestamp());
     }
 
     public NetworkedTransform GetCurrentNetworkedTransform() {
@@ -114,93 +122,90 @@ public class PlayerController : NetworkBehaviour {
     }
 
     [Command]
-    public void CmdSetTransform(NetworkedTransform networkedTransform, float time) {
+    public void CmdSetTransform(NetworkedTransform networkedTransform, int time) {
         RpcSetTransform(networkedTransform, time);
     }
 
     [ClientRpc]
-    public void RpcSetTransform(NetworkedTransform networkedTransform, float time) {
+    public void RpcSetTransform(NetworkedTransform networkedTransform, int time) {
+        if (isLocalPlayer) {
+            return;
+        }
 
         nextNetworkedTransform = networkedTransform;
 
         extrapolatedPosition = networkedTransform.GetPosition();
-        return;
 
-        if (Time.time == lastPositionsTimes[0]) {
-            return;
-        }
-        nextNetworkedTransform = networkedTransform;
+        //if (Time.time == lastPositionsTimes[0]) {
+        //    return;
+        //}
+        //nextNetworkedTransform = networkedTransform;
 
-        //Extrapolation
-        Vector3[] tmpLastPosition = new Vector3[10];
-        for (int i = 0; i < 10; i++) {
-            tmpLastPosition[i] = lastPositions[i];
-        }
+        ////Extrapolation
+        //Vector3[] tmpLastPosition = new Vector3[10];
+        //for (int i = 0; i < 10; i++) {
+        //    tmpLastPosition[i] = lastPositions[i];
+        //}
 
-        lastPositions[0] = networkedTransform.GetPosition();
+        //lastPositions[0] = networkedTransform.GetPosition();
 
-        for (int i = 0; i < 9; i++) {
-            lastPositions[i + 1] = tmpLastPosition[i];
-        }
+        //for (int i = 0; i < 9; i++) {
+        //    lastPositions[i + 1] = tmpLastPosition[i];
+        //}
 
-        //Time 
-        float[] tmpLastPositionTimes = new float[10];
-        for(int i = 0;i < 10;i++) {
-            tmpLastPositionTimes[i] = lastPositionsTimes[i];
-        }
+        ////Time 
+        //float[] tmpLastPositionTimes = new float[10];
+        //for(int i = 0;i < 10;i++) {
+        //    tmpLastPositionTimes[i] = lastPositionsTimes[i];
+        //}
 
-        lastPositionsTimes[0] = Time.time;
+        //lastPositionsTimes[0] = Time.time;
 
-        for(int i = 0;i < 9;i++) {
-            lastPositionsTimes[i + 1] = tmpLastPositionTimes[i];
-        }
+        //for(int i = 0;i < 9;i++) {
+        //    lastPositionsTimes[i + 1] = tmpLastPositionTimes[i];
+        //}
 
-        //Compute extrapolatedPosition
-        int limit = 3;
-        float[] t = new float[limit];
-        for(int i = 0;i < limit;i++) {
-            t[i] = lastPositionsTimes[i];
-        }
-
-
-        float[] x = new float[limit];
-        for (int i = 0; i < limit; i++) {
-            x[i] = lastPositions[i].x;
-        }
-
-        float[] y = new float[limit];
-        for(int i = 0;i < limit;i++) {
-            y[i] = lastPositions[i].y;
-        }
-
-        Vector2[] controlsPointX = new Vector2[limit];
-        for (int i = 0; i < limit; i++) {
-            controlsPointX[i] = new Vector2(lastPositionsTimes[i], lastPositions[i].x);
-        }
-
-        Vector2[] controlsPointY = new Vector2[limit];
-        for(int i = 0;i < limit;i++) {
-            controlsPointY[i] = new Vector2(lastPositionsTimes[i], lastPositions[i].y);
-        }
-
-        float ti = lastPositionsTimes[0] + time / 2000f + CustomNetworkManager.singleton.client.GetRTT() / 2000f +
-                  (lastPositionsTimes[0] - lastPositionsTimes[1]);
-
-        Debug.Log("time =================>");
-        Debug.Log("Time.time : " + Time.time);
-        Debug.Log("Time : " + time / 2000f);
-        Debug.Log("ping : " + CustomNetworkManager.singleton.client.GetRTT() / 2000f);
-        Debug.Log("lastTime[0] : " + lastPositionsTimes[0]);
-        Debug.Log("ti : " + ti);
-        Debug.Log("<================ time");
+        ////Compute extrapolatedPosition
+        //int limit = 3;
+        //float[] t = new float[limit];
+        //for(int i = 0;i < limit;i++) {
+        //    t[i] = lastPositionsTimes[i];
+        //}
 
 
-        if (lastPositions[0] != lastPositions[1]) {
-            extrapolatedPosition = new Vector2(Extrapolation.InterpolateX(t, x, ti),
-                Extrapolation.InterpolateX(t, y, ti));
-        }
+        //float[] x = new float[limit];
+        //for (int i = 0; i < limit; i++) {
+        //    x[i] = lastPositions[i].x;
+        //}
+
+        //float[] y = new float[limit];
+        //for(int i = 0;i < limit;i++) {
+        //    y[i] = lastPositions[i].y;
+        //}
+
+        //Vector2[] controlsPointX = new Vector2[limit];
+        //for (int i = 0; i < limit; i++) {
+        //    controlsPointX[i] = new Vector2(lastPositionsTimes[i], lastPositions[i].x);
+        //}
+
+        //Vector2[] controlsPointY = new Vector2[limit];
+        //for(int i = 0;i < limit;i++) {
+        //    controlsPointY[i] = new Vector2(lastPositionsTimes[i], lastPositions[i].y);
+        //}
+
+        //NetworkConnection conn = CustomNetworkManager.singleton.client.connection;
+        //byte e;
+        //float ti = NetworkTransport.GetRemoteDelayTimeMS(conn.hostId, conn.connectionId, time, out e) / 1000f;
+
+        //Debug.Log("time =================>");
+        //Debug.Log("lastTime[0] : " + lastPositionsTimes[0]);
+        //Debug.Log("ti : " + ti);
+        //Debug.Log("<================ time");
 
 
+        //if (lastPositions[0] != lastPositions[1]) {
+        //    extrapolatedPosition = new Vector2(Extrapolation.InterpolateX(t, x, ti), Extrapolation.InterpolateX(t, y, ti));
+        //}
     }
 
     [Command]
@@ -223,15 +228,11 @@ public class PlayerController : NetworkBehaviour {
         Vector3 offsetExtrapolation = extrapolatedPosition;
         Vector3 offsetInterpolation = nextNetworkedTransform.GetPosition();
 
-        if (!isLocalPlayer && isClient) {
+        if (!isLocalPlayer) {
 	        transform.eulerAngles = nextNetworkedTransform.GetRotationEulerAngle();
 	        transform.position = Vector2.Lerp(transform.position, offsetExtrapolation, Time.deltaTime * speed);
 	        return;
 	    }
-
-        if (!isLocalPlayer) {
-            return;
-        } 
 
         Vector3 topLeft = new Vector2(-0.5f,0.5f);
         Vector3 topRight = new Vector2(0.5f,0.5f);
@@ -288,14 +289,12 @@ public class PlayerController : NetworkBehaviour {
     }
 
     [Command]
-    void CmdFire(Vector3 pos, Quaternion rot, int time, NetworkIdentity id) {
+    void CmdFire(Vector3 pos, Quaternion rot, int timeNetworkTimestamp, NetworkIdentity id) {
         byte e;
-        int delay;
+        int delay = 0;
 
-        if(id.isLocalPlayer) {
-            delay = (int)(Time.fixedDeltaTime * 1000);
-        } else {
-            delay = NetworkTransport.GetRemoteDelayTimeMS(connectionToClient.hostId, connectionToClient.connectionId, time, out e);
+        if(!id.isLocalPlayer) {
+            delay = NetworkTransport.GetRemoteDelayTimeMS(connectionToClient.hostId, connectionToClient.connectionId, timeNetworkTimestamp, out e);
         }
 
         GameObject bullet = Instantiate(bulletPrefab, pos, rot);

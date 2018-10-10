@@ -39,8 +39,12 @@ public class CustomNetworkDiscovery : NetworkDiscovery {
     }
 
     IEnumerator ReconnectDiscovery() {
-        while (!base.StartAsClient()) {
-            yield return new WaitForFixedUpdate();
+        if (base.isClient) {
+            while (!base.StartAsClient()) {
+                yield return new WaitForFixedUpdate();
+            }
+        } else {
+
         }
     }
 

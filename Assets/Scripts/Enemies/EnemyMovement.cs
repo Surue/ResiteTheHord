@@ -20,6 +20,9 @@ public class EnemyMovement : NetworkBehaviour {
 
     Vector3 interpollatedPosition = new Vector3();
     Vector3 extrapolatedPosition = new Vector3();
+
+    int frameToWait = 5;
+    int waitedFrame = 0;
     #endregion
 
     #region Movement
@@ -139,7 +142,12 @@ public class EnemyMovement : NetworkBehaviour {
                 body.velocity = Vector2.zero;
             }
 
-            CmdUpdatePosition();
+            if(waitedFrame <= 0) {
+                waitedFrame = frameToWait;
+                CmdUpdatePosition();
+            } else {
+                waitedFrame--;
+            }
         }
     }
 
@@ -255,9 +263,9 @@ public class EnemyMovement : NetworkBehaviour {
         int delay;
 
         if(!isServer) {
-            delay = NetworkTransport.GetRemoteDelayTimeMS(conn.hostId, conn.connectionId, time, out e);
+            delay = NetworkTransport.GetRemoteDelayTimeMS(conn.hostId, conn.connectionId, time, out e) + frameToWait * (int)(Time.fixedDeltaTime * 1000);
         } else {
-            delay = (int)(Time.fixedDeltaTime * 1000);
+            delay = frameToWait * (int)(Time.fixedDeltaTime * 1000);
         }
 
         if(Mathf.Abs(lastPosition.x - nextPos.x) < 0.1f) { //Vertical movement

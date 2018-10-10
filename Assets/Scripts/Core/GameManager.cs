@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -9,7 +10,7 @@ public class GameManager : NetworkBehaviour {
     [SerializeField] bool hasToGenerateMap = false;
     [SerializeField] GameObject mainGoalForEnnemies;
 
-    PlayerController[] players;
+    List<PlayerController> players;
     PlayerSpawner[] playerSpawner;
     EnemySpawner[] enemySpawners;
 
@@ -40,6 +41,10 @@ public class GameManager : NetworkBehaviour {
     }
 
     State state = State.INTRO;
+
+    void Awake() {
+        players = new List<PlayerController>();
+    }
 
     // Use this for initialization
     void Start () {
@@ -80,9 +85,6 @@ public class GameManager : NetworkBehaviour {
                 break;
 
             case State.INITIALIZE:
-                //Find all players
-                players = FindObjectsOfType<PlayerController>();
-
                 //Find all playerSpawner
                 playerSpawner = FindObjectsOfType<PlayerSpawner>();
 
@@ -140,7 +142,7 @@ public class GameManager : NetworkBehaviour {
                     enemySpawners[i].AddEnemiesToSpawn(enemiesPerSpawner[i]);
                 }
 
-                numberOfEnemiesPerSpawn += players.Length;
+                numberOfEnemiesPerSpawn += players.Count;
                 timeBeforeNextWaves = timeBetweenWaves;
                 state = State.WAIT_END_SPAWN;
                 break;
@@ -198,5 +200,16 @@ public class GameManager : NetworkBehaviour {
     [Server]
     public GameObject GetMainGoalForEnnemies() {
         return mainGoalForEnnemies;
+    }
+
+    [Command]
+    public void CmdOnClientConnected(NetworkIdentity player) {
+        Debug.Log("New player");
+        if (state == State.GENERATE_MAP) {
+            players.Add(player.GetComponent<PlayerController>());
+        } else {
+            players.Add(player.GetComponent<PlayerController>());
+            playersWaitingToRespawn.Add(player.GetComponent<PlayerController>());
+        }
     }
 }
