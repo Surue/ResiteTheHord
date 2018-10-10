@@ -71,11 +71,11 @@ public class MapGenerator: NetworkBehaviour {
         roomQuadTree = new List<Room>();
         mapController = GetComponent<MapController>();
 
-        colors = new List<Color>();
+        //colors = new List<Color>();
 
-        for(int i = 0;i < 1000;i++) {
-            colors.Add(new Color(Random.value, Random.value, Random.value));
-        }
+        //for(int i = 0;i < 1000;i++) {
+        //    colors.Add(new Color(Random.value, Random.value, Random.value));
+        //}
     }
 
     IEnumerator BinarySpacePartitioning() {
@@ -479,6 +479,7 @@ public class MapGenerator: NetworkBehaviour {
     }
 
     void OnDrawGizmos() {
+        return;
         if(roomQuadTree == null) {
             return;
         }

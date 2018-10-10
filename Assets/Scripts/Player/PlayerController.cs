@@ -98,6 +98,7 @@ public class PlayerController : NetworkBehaviour {
 	    }
 	    else {
 	        GetComponentInChildren<PlayerCursor>().gameObject.SetActive(false);
+            Destroy(GetComponent<AudioListener>());
         }
 
         for (int i = 0; i < 10; i++) {

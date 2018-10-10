@@ -5,10 +5,8 @@ using UnityEngine.Networking;
 
 public class RandomSeed:NetworkBehaviour {
 
-    public float curSeed;
-    public float forcedSeed = 0;
+    [SyncVar] float f = 0;
 
-    [SyncVar]
     public static float SEED_PROCEDURAL_GENERATION = 12;
 
     //Value for Linear congruential generator NEVER CHANGE THEM!!!
@@ -16,18 +14,16 @@ public class RandomSeed:NetworkBehaviour {
     static long incrementer = 12345;
     static long modulus = (long)Mathf.Pow(2f, 31f);
 
-    // Use this for initialization
-    void Start() {
-        if (!isServer) {
-            return;
-        }
-
-        if (forcedSeed != 0) {
-            SEED_PROCEDURAL_GENERATION = forcedSeed;
-            curSeed = forcedSeed;
-        } else {
+    void Awake() {
+        if(isServer) {
             SEED_PROCEDURAL_GENERATION = Random.value;
-            curSeed = SEED_PROCEDURAL_GENERATION;
+            f = SEED_PROCEDURAL_GENERATION;
+        }
+    }
+
+    void Start() {
+        if (f != 0) {
+            SEED_PROCEDURAL_GENERATION = f;
         }
     }
 

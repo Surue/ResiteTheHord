@@ -13,10 +13,12 @@ public class PlayerHealth : Health {
     CameraShaking cameraShaking;
     
     // Use this for initialization
+    void Awake() {
+        soundsController = GetComponent<PlayerSounds>();
+    }
+
     void Start () {
         cameraShaking = FindObjectOfType<CameraShaking>();
-
-        soundsController = GetComponent<PlayerSounds>();
     }
 
     [Server]
