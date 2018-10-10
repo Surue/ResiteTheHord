@@ -8,9 +8,7 @@ public class PlayerHealth : Health {
     public RectTransform healthBar;
 
     CameraShaking cameraShaking;
-
-
-
+    
     // Use this for initialization
     void Start () {
         cameraShaking = FindObjectOfType<CameraShaking>();
@@ -71,7 +69,7 @@ public class PlayerHealth : Health {
         if(isLocalPlayer) {
             currentHealth = MAX_HEALTH;
 
-            RpcOnHealthChanged(currentHealth);
+            healthBar.sizeDelta = new Vector2(currentHealth, healthBar.sizeDelta.y);
 
             transform.position = pos;
         }

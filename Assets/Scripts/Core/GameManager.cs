@@ -8,7 +8,7 @@ public class GameManager : NetworkBehaviour {
 
     [SerializeField] bool skipIntro = false;
     [SerializeField] bool hasToGenerateMap = false;
-    [SerializeField] GameObject mainGoalForEnnemies;
+    GameObject mainGoalForEnnemies;
 
     List<PlayerController> players;
     PlayerSpawner[] playerSpawner;
@@ -29,6 +29,9 @@ public class GameManager : NetworkBehaviour {
     //Scene when died
     [SerializeField]
     string sceneWhenCoreDestroyed;
+
+    //Random seed prefab
+    [SerializeField] GameObject randomSeed;
 
     enum State {
         INTRO,
@@ -65,6 +68,10 @@ public class GameManager : NetworkBehaviour {
             }
 
             countDownTimer = FindObjectOfType<CountDownTimer>();
+
+            GameObject instance = Instantiate(randomSeed);
+
+            NetworkServer.Spawn(instance);
         }
     }
 	
