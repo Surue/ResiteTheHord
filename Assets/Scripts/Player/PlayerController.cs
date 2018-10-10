@@ -56,6 +56,9 @@ public class PlayerController : NetworkBehaviour {
     Vector3 movement;
     [SerializeField] float speed = 4f;
 
+    //Sounds
+    PlayerSounds soundsController;
+
     //Score
     [SyncVar]
     int score = 0;
@@ -69,6 +72,8 @@ public class PlayerController : NetworkBehaviour {
         GetComponentInChildren<PlayerCursor>().GetComponent<SpriteRenderer>().color = color;
 
         body = GetComponent<Rigidbody2D>();
+
+        soundsController = GetComponent<PlayerSounds>();
 
         if (isServer) {
             if(FindObjectOfType<GameManager>()) {
@@ -278,6 +283,8 @@ public class PlayerController : NetworkBehaviour {
 	}
 
     void SpawnGhost(Vector3 pos, Quaternion rot, GameObject target = null) {
+        soundsController.Fire();
+
         GameObject bullet = Instantiate(ghostBulletPrefab, pos, rot);
 
         Vector2 vel = bullet.transform.up * bulletSpeed; //Compute velocity

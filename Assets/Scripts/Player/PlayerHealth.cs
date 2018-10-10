@@ -5,6 +5,9 @@ using UnityEngine.Networking;
 
 public class PlayerHealth : Health {
 
+    //Sounds
+    PlayerSounds soundsController;
+
     public RectTransform healthBar;
 
     CameraShaking cameraShaking;
@@ -12,6 +15,8 @@ public class PlayerHealth : Health {
     // Use this for initialization
     void Start () {
         cameraShaking = FindObjectOfType<CameraShaking>();
+
+        soundsController = GetComponent<PlayerSounds>();
     }
 
     [Server]
@@ -36,6 +41,7 @@ public class PlayerHealth : Health {
 
     [ClientRpc]
     public override void RpcOnHealthChanged(int health) {
+        soundsController.Damage();
         currentHealth = health;
 
         healthBar.sizeDelta = new Vector2(health, healthBar.sizeDelta.y);
@@ -61,6 +67,8 @@ public class PlayerHealth : Health {
 
     [ClientRpc]
     public override void RpcRespawn(Vector3 pos) {
+        soundsController.Spawn();
+
         GameObject instance = Instantiate(spawnParticleSystem, pos, Quaternion.identity).gameObject;
 
         ParticleSystem.MainModule main = instance.GetComponent<ParticleSystem>().main;
