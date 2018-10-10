@@ -1,12 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
 
-public class RandomSeed:MonoBehaviour {
+public class RandomSeed:NetworkBehaviour {
 
     public float curSeed;
     public float forcedSeed = 0;
 
+    [SyncVar]
     public static float SEED_PROCEDURAL_GENERATION = 12;
 
     //Value for Linear congruential generator NEVER CHANGE THEM!!!
@@ -16,6 +18,10 @@ public class RandomSeed:MonoBehaviour {
 
     // Use this for initialization
     void Start() {
+        if (!isServer) {
+            return;
+        }
+
         if (forcedSeed != 0) {
             SEED_PROCEDURAL_GENERATION = forcedSeed;
             curSeed = forcedSeed;

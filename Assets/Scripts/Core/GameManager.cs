@@ -33,6 +33,8 @@ public class GameManager : NetworkBehaviour {
     //Random seed prefab
     [SerializeField] GameObject randomSeed;
 
+    MapGenerator mapGenerator;
+
     enum State {
         INTRO,
         GENERATE_MAP,
@@ -52,9 +54,12 @@ public class GameManager : NetworkBehaviour {
     // Use this for initialization
     void Start () {
 
+        mapGenerator = FindObjectOfType<MapGenerator>();
+
         if (!isServer) {
             if(hasToGenerateMap) {
-                FindObjectOfType<MapGenerator>().StartGeneration();
+                state = State.GENERATE_MAP;
+                mapGenerator.StartGeneration();
             }
         }
         else {
@@ -64,7 +69,7 @@ public class GameManager : NetworkBehaviour {
 
             if (hasToGenerateMap) {
                 state = State.GENERATE_MAP;
-                FindObjectOfType<MapGenerator>().StartGeneration();
+                mapGenerator.StartGeneration();
             }
 
             countDownTimer = FindObjectOfType<CountDownTimer>();
@@ -78,6 +83,18 @@ public class GameManager : NetworkBehaviour {
 	// Update is called once per frame
 	void Update () {
 	    if (!isServer) {
+	        switch (state) {
+	            case State.GENERATE_MAP:
+	                if(!mapGenerator.isGenerating) {
+	                    GameObject.Find("PanelHider").SetActive(false);
+                        state = State.INITIALIZE;
+	                }
+	                break;
+	            case State.INITIALIZE:
+
+	                break;
+            }
+
 	        return;
 	    }
 
@@ -86,7 +103,7 @@ public class GameManager : NetworkBehaviour {
                 break;
 
             case State.GENERATE_MAP:
-                if (!FindObjectOfType<MapGenerator>().isGenerating) {
+                if (!mapGenerator.isGenerating) {
                     state = State.INITIALIZE;
                 }
                 break;
