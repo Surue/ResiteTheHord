@@ -31,6 +31,8 @@ public class MapController:MonoBehaviour {
             }
         }
 
+        FindObjectOfType<NavigationAI>().GenerateNavigationGraph(tiles, new Vector2Int(5, 5));
+
         DrawAll();
     }
 

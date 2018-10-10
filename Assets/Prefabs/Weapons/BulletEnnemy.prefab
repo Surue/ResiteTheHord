@@ -192,7 +192,7 @@ TrailRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -989565151
-  m_SortingLayer: 2
+  m_SortingLayer: 3
   m_SortingOrder: 0
   m_Time: 0.075
   m_Parameters:
@@ -310,7 +310,7 @@ MonoBehaviour:
   trail: {fileID: 96588978391390004}
   layerToIgnore:
     serializedVersion: 2
-    m_Bits: 2048
+    m_Bits: 26624
 --- !u!212 &212684841067646822
 SpriteRenderer:
   m_ObjectHideFlags: 1
@@ -344,7 +344,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -989565151
-  m_SortingLayer: 2
+  m_SortingLayer: 3
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: ac92c728dea0ac64a997f085a63625f1, type: 3}
   m_Color: {r: 0, g: 0, b: 0, a: 1}
@@ -390,7 +390,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -989565151
-  m_SortingLayer: 2
+  m_SortingLayer: 3
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 59ad97ea5e3bc17478bbdeabaa1d8a1d, type: 3}
   m_Color: {r: 0, g: 0, b: 0, a: 0.2509804}

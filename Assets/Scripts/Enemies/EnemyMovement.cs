@@ -62,7 +62,9 @@ public class EnemyMovement : NetworkBehaviour {
     void Start () {
         body = GetComponent<Rigidbody2D>();
         pathFinder = FindObjectOfType<PathFinding>();
-	}
+
+        extrapolatedPosition = transform.position;
+    }
 
     public static Vector2 Rotate(Vector2 v, float degrees) {
         float sin = Mathf.Sin(degrees * Mathf.Deg2Rad);
@@ -169,7 +171,6 @@ public class EnemyMovement : NetworkBehaviour {
         }
 
         targetPosition = transform.position;
-
         switch(state) {
             case State.INITIALIZE:
                 state = State.IDLE;
@@ -177,6 +178,7 @@ public class EnemyMovement : NetworkBehaviour {
 
             case State.IDLE:
                 path.Clear();
+
                 path = pathFinder.GetPathFromTo(transform, mainGoal);
                 state = State.MOVE_TO_BASE;
                 break;
@@ -198,12 +200,12 @@ public class EnemyMovement : NetworkBehaviour {
                     }
                 }
 
-                if(timerCheckPath > timeBetweenPathChecking) {
-                    timerCheckPath = 0;
-                    state = State.IDLE;
-                } else {
-                    timerCheckPath += Time.deltaTime;
-                }
+                //if(timerCheckPath > timeBetweenPathChecking) {
+                //    timerCheckPath = 0;
+                //    state = State.IDLE;
+                //} else {
+                //    timerCheckPath += Time.deltaTime;
+                //}
                 break;
 
             case State.MOVE_TO_TARGET:

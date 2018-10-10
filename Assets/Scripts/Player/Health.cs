@@ -26,7 +26,7 @@ public class Health : NetworkBehaviour {
                     bulletOwner.CmdAddScore(score.transform.position, score.score);
                 }
             } else {
-                RpcRespawn();
+                FindObjectOfType<GameManager>().OnPlayerDeath(this.gameObject);
             }
         } else {
             RpcOnHealthChanged(currentHealth);
@@ -37,7 +37,7 @@ public class Health : NetworkBehaviour {
     public virtual void RpcOnHealthChanged(int health) { }
 
     [ClientRpc]
-    public virtual void RpcRespawn() { }
+    public virtual void RpcRespawn(Vector3 pos) { }
 
     [ClientRpc]
     public virtual void RpcDestroy() { }

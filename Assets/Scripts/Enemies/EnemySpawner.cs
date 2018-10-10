@@ -18,7 +18,10 @@ public class EnemySpawner : NetworkBehaviour {
 
     void Start() {
         gameManager = FindObjectOfType<GameManager>();
-        mainGoalForEnemies = gameManager.GetMainGoalForEnnemies();
+    }
+
+    public void SetMainGoal(GameObject goal) {
+        mainGoalForEnemies = goal;
     }
 
     public void AddEnemiesToSpawn(int nb) {
@@ -55,12 +58,16 @@ public class EnemySpawner : NetworkBehaviour {
     }
     
     void Spawn() {
-        Vector3 spawnPosition = new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f)) + transform.position;
+        Vector3 spawnPosition = transform.position;
 
         GameObject enemy = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);
+
+        enemy.transform.position = spawnPosition;
+
         if (enemy.GetComponent<EnemyMovement>()) {
             enemy.GetComponent<EnemyMovement>().Initialize(mainGoalForEnemies.transform);
         }
+
         NetworkServer.Spawn(enemy);
     }
 }

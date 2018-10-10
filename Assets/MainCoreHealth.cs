@@ -7,6 +7,10 @@ public class MainCoreHealth : Health {
 
     public RectTransform healthBar;
 
+    void Start() {
+        healthBar = GameObject.Find("Forground").GetComponent<RectTransform>();
+    }
+
     [ClientRpc]
     public override void RpcDestroy() {
         if(explosionParticleSystem != null) {

@@ -272,7 +272,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   destroyOnDeath: 0
-  currentHealth: 100
+  currentHealth: 1
   explosionParticleSystem: {fileID: 0}
   healthBar: {fileID: 224740483824818220}
 --- !u!114 &114337323480026800

@@ -32,4 +32,8 @@ public class PlayerCursor : MonoBehaviour {
             transform.localScale = Vector3.one * initialScale * inCurve.Evaluate(animationPoint) ;
         }
 	}
+
+    void OnDestroy() {
+        Cursor.visible = true;
+    }
 }

@@ -6,9 +6,11 @@ using UnityEngine.Networking;
 public class GameManager : NetworkBehaviour {
 
     [SerializeField] bool skipIntro = false;
+    [SerializeField] bool hasToGenerateMap = false;
     [SerializeField] GameObject mainGoalForEnnemies;
 
     PlayerController[] players;
+    PlayerSpawner[] playerSpawner;
     EnemySpawner[] enemySpawners;
 
     //Waves
@@ -21,7 +23,7 @@ public class GameManager : NetworkBehaviour {
     CountDownTimer countDownTimer;
 
     //Life system
-    List<GameObject> playersWaitingToRespawn = new List<GameObject>();
+    List<PlayerController> playersWaitingToRespawn = new List<PlayerController>();
 
     //Scene when died
     [SerializeField]
@@ -29,6 +31,7 @@ public class GameManager : NetworkBehaviour {
 
     enum State {
         INTRO,
+        GENERATE_MAP,
         INITIALIZE,
         WAIT_NEXT_WAVE,
         SPAWN_ENEMIES,
@@ -40,25 +43,69 @@ public class GameManager : NetworkBehaviour {
 
     // Use this for initialization
     void Start () {
-        if(skipIntro) {
-            state = State.INITIALIZE;
-        }
 
-        countDownTimer = FindObjectOfType<CountDownTimer>();
+        if (!isServer) {
+            if(hasToGenerateMap) {
+                FindObjectOfType<MapGenerator>().StartGeneration();
+            }
+        }
+        else {
+            if (skipIntro) {
+                state = State.INITIALIZE;
+            }
+
+            if (hasToGenerateMap) {
+                state = State.GENERATE_MAP;
+                FindObjectOfType<MapGenerator>().StartGeneration();
+            }
+
+            countDownTimer = FindObjectOfType<CountDownTimer>();
+        }
     }
 	
 	// Update is called once per frame
 	void Update () {
+	    if (!isServer) {
+	        return;
+	    }
 
 	    switch (state) {
             case State.INTRO:
                 break;
 
+            case State.GENERATE_MAP:
+                if (!FindObjectOfType<MapGenerator>().isGenerating) {
+                    state = State.INITIALIZE;
+                }
+                break;
+
             case State.INITIALIZE:
+                //Find all players
                 players = FindObjectsOfType<PlayerController>();
 
+                //Find all playerSpawner
+                playerSpawner = FindObjectsOfType<PlayerSpawner>();
+
+                //Respawn all player
+                playersWaitingToRespawn.AddRange(players);
+
+                //Find motherboard
+                mainGoalForEnnemies = FindObjectOfType<MainCore>().gameObject;
+
+                //Find all enemySpawner
                 enemySpawners = FindObjectsOfType<EnemySpawner>();
-                if(players.Length != 0)
+
+                //Set objectiv for enemies
+                foreach (EnemySpawner enemySpawner in enemySpawners) {
+                    enemySpawner.SetMainGoal(mainGoalForEnnemies);
+                }
+
+                //Find circle effect
+                CircleEffect circle = FindObjectOfType<CircleEffect>();
+                if (circle) {
+                    circle.transform.position = mainGoalForEnnemies.transform.position;
+                }
+
                 state = State.WAIT_NEXT_WAVE;
                 break;
 
@@ -110,26 +157,45 @@ public class GameManager : NetworkBehaviour {
                 break;
 	    }
 
-	    if (playersWaitingToRespawn.Count > 0) {
-            playersWaitingToRespawn[playersWaitingToRespawn.Count - 1].GetComponent<Health>().RpcRespawn();
-            playersWaitingToRespawn.RemoveAt(playersWaitingToRespawn.Count - 1);
-	    }
-	}
+	    if(playersWaitingToRespawn.Count > 0) {
+            //Select spawn point
+	        bool found = false;
 
+	        PlayerSpawner spawner = null;
+	        for (int i = 0; i < playerSpawner.Length; i++) {
+	            if (playerSpawner[i].isFree) {
+	                spawner = playerSpawner[i];
+                    playerSpawner[i].Spawn();
+	                i = playerSpawner.Length;
+
+	            }
+	        }
+
+	        if (spawner != null) {
+	            playersWaitingToRespawn[playersWaitingToRespawn.Count - 1].GetComponent<PlayerHealth>().RpcRespawn(spawner.transform.position);
+	            playersWaitingToRespawn.RemoveAt(playersWaitingToRespawn.Count - 1);
+	        }
+	    }
+    }
+
+    [Server]
     public void OnPlayerDeath(GameObject player) {
         Debug.Log("A player died");
 
-        playersWaitingToRespawn.Add(player);
+        playersWaitingToRespawn.Add(player.GetComponent<PlayerController>());
     }
 
+    [Server]
     public void OnMainCoreDestroyed() {
         CustomNetworkManager.singleton.ServerChangeScene(sceneWhenCoreDestroyed);
     }
 
+    [Server]
     public void FinishedSpawn() {
         spawnerFinishedSpawn++;
     }
 
+    [Server]
     public GameObject GetMainGoalForEnnemies() {
         return mainGoalForEnnemies;
     }

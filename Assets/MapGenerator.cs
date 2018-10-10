@@ -1,9 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
-using UnityEngine.Tilemaps;
+using UnityEngine.Networking;
 
-public class MapGenerator:MonoBehaviour {
+public class MapGenerator: NetworkBehaviour {
 
     class Room {
         public MapTile[,] roomTiles;
@@ -15,10 +16,6 @@ public class MapGenerator:MonoBehaviour {
         public bool isFinal = false;
 
         public bool isConnected = false;
-
-        public Vector2Int GetCenter() {
-            return new Vector2Int((int)(roomTiles.GetLength(0) / 2f), (int)(roomTiles.GetLength(1) / 2f));
-        }
     }
 
     #region Rules
@@ -42,8 +39,17 @@ public class MapGenerator:MonoBehaviour {
     [SerializeField] int exteriorWallSize = 10;
 
     [Header("Tiles")]
-    public RuleTile solidTile;
-    public RuleTile groundTile;
+    [SerializeField] RuleTile solidTile;
+    [SerializeField] RuleTile groundTile;
+    [SerializeField] RuleTile motherChipTile;
+    [SerializeField] RuleTile enemySpawnerTile;
+    [SerializeField] RuleTile playerSpawnerTile;
+
+    [Header("Gameobject to spawn")]
+    [SerializeField] GameObject mainCore;
+    [SerializeField] GameObject enemySpawner;
+    [SerializeField] int nbPlayerSpawer = 4;
+    [SerializeField] GameObject playerSpawner;
     #endregion
 
     List<Room> roomQuadTree;
@@ -57,14 +63,13 @@ public class MapGenerator:MonoBehaviour {
     [SerializeField] bool showBSP = true;
     [SerializeField] bool showWall = true;
     [SerializeField] bool showExteriorWall = true;
-
     #endregion
 
-    void Start() {
+    public bool isGenerating = false;
+
+    void Awake() {
         roomQuadTree = new List<Room>();
         mapController = GetComponent<MapController>();
-
-        StartCoroutine(BinarySpacePartitioning());
 
         colors = new List<Color>();
 
@@ -347,7 +352,130 @@ public class MapGenerator:MonoBehaviour {
 
         yield return null;
 
+        StartCoroutine(AddObjects());
+    }
+
+    IEnumerator AddObjects() {
+
+        //Find biggest room
+
+        int maxSize = 0;
+        Room mainRoom = null;
+
+        foreach(Room room in roomQuadTree) {
+            if(room.isFinal && room.roomTiles.GetLength(0) * room.roomTiles.GetLength(1) > maxSize) {
+                maxSize = room.roomTiles.GetLength(0) * room.roomTiles.GetLength(1);
+                mainRoom = room;
+            }
+        }
+
+        //Add motherChip tiles
+        {
+            int x = mainRoom.roomTiles.GetLength(0) / 2 - mainRoom.roomTiles.GetLength(0) % 2;
+            int y = mainRoom.roomTiles.GetLength(1) / 2 - mainRoom.roomTiles.GetLength(1) % 2;
+            mainRoom.roomTiles[x, y].groundTile = motherChipTile;
+            mainRoom.roomTiles[x + 1, y].groundTile = motherChipTile;
+            mainRoom.roomTiles[x, y + 1].groundTile = motherChipTile;
+            mainRoom.roomTiles[x + 1, y + 1].groundTile = motherChipTile;
+        }
+
+        for (int i = 0; i < roomQuadTree[0].roomTiles.GetLength(0); i++) {
+            for (int j = 0; j < roomQuadTree[0].roomTiles.GetLength(1); j++) {
+                if (roomQuadTree[0].roomTiles[i, j].groundTile == motherChipTile) {
+                    if (isServer) {
+                        GameObject instance = Instantiate(mainCore);
+                        instance.transform.position = new Vector2(i - 1f - maxWallSize, j - 1f - maxWallSize);
+
+                        NetworkServer.Spawn(instance);
+                    }
+
+                    j = roomQuadTree[0].roomTiles.GetLength(1);
+                    i = roomQuadTree[0].roomTiles.GetLength(0);
+                }
+            }
+        }
+
+        yield return null;
+        //Add 4 Player Spawner in main room
+        int playerSpawnerNb = 0;
+
+        while (playerSpawnerNb < nbPlayerSpawer) {
+            //Get RandomTile in main Room
+
+            Vector2Int posTile = new Vector2Int(
+                (int) (RandomSeed.GetValue() * mainRoom.roomTiles.GetLength(0)),
+                (int) (RandomSeed.GetValue() * mainRoom.roomTiles.GetLength(1))
+                );
+
+            BoundsInt bounds = new BoundsInt(-1, -1, 0, 2, 2, 1);
+
+            bool neighborsAllFree = true;
+            foreach (Vector3Int b in bounds.allPositionsWithin) {
+                if (posTile.x + b.x > 0 && posTile.x + b.x < mainRoom.roomTiles.GetLength(0) - 1 && 
+                    posTile.y + b.y > 0 && posTile.y + b.y < mainRoom.roomTiles.GetLength(1) - 1) {
+                    if (mainRoom.roomTiles[posTile.x + b.x, posTile.y + b.y].groundTile != groundTile || 
+                        mainRoom.roomTiles[posTile.x + b.x, posTile.y + b.y].groundTile == motherChipTile ||
+                        mainRoom.roomTiles[posTile.x + b.x, posTile.y + b.y].groundTile == playerSpawnerTile) {
+                        neighborsAllFree = false;
+                        continue;
+                    }
+                } else {
+                    neighborsAllFree = false;
+                    continue;
+                }
+            }
+
+            if (neighborsAllFree) {
+                foreach(Vector3Int b in bounds.allPositionsWithin) {
+                    mainRoom.roomTiles[posTile.x + b.x, posTile.y + b.y].groundTile = playerSpawnerTile;
+                }
+
+                playerSpawnerNb++;
+            }
+
+            yield return null;
+        }
+
+        //Add one Spawner per Room
+        foreach (Room room in roomQuadTree) {
+            if (room.isFinal && room != mainRoom) {
+                int x = room.roomTiles.GetLength(0) / 2 - room.roomTiles.GetLength(0) % 2;
+                int y = room.roomTiles.GetLength(1) / 2 - room.roomTiles.GetLength(1) % 2;
+
+                room.roomTiles[x, y].groundTile = enemySpawnerTile;
+                room.roomTiles[x + 1, y].groundTile = enemySpawnerTile;
+                room.roomTiles[x, y + 1].groundTile = enemySpawnerTile;
+                room.roomTiles[x + 1, y + 1].groundTile = enemySpawnerTile;
+            }
+        }
+
+        yield return null;
+
+        for(int i = 0;i < roomQuadTree[0].roomTiles.GetLength(0);i++) {
+            for(int j = 0;j < roomQuadTree[0].roomTiles.GetLength(1);j++) {
+                if(roomQuadTree[0].roomTiles[i, j].groundTile == enemySpawnerTile) {
+                    Vector2 pos = new Vector2(i - 1f - maxWallSize, j - 1f - maxWallSize);
+
+                    if (!Physics2D.OverlapBox(pos, Vector2.one, 0, 1 << LayerMask.NameToLayer("EnemySpawner"))) {
+                        GameObject instance = Instantiate(enemySpawner);
+                        instance.transform.position = pos;
+                    }
+                }
+
+                if(roomQuadTree[0].roomTiles[i, j].groundTile == playerSpawnerTile) {
+                    Vector2 pos = new Vector2(i - 1f - maxWallSize, j - 1f - maxWallSize);
+
+                    if(!Physics2D.OverlapBox(pos, Vector2.one, 0, 1 << LayerMask.NameToLayer("PlayerSpawner"))) {
+                        GameObject instance = Instantiate(playerSpawner);
+                        instance.transform.position = pos;
+                    }
+                }
+            }
+        }
+
         mapController.SetTiles(roomQuadTree[0].roomTiles);
+
+        isGenerating = false;
     }
 
     void OnDrawGizmos() {
@@ -429,5 +557,11 @@ public class MapGenerator:MonoBehaviour {
                 }
             }
         }
+    }
+
+    public void StartGeneration() {
+        isGenerating = true;
+
+        StartCoroutine(BinarySpacePartitioning());
     }
 }

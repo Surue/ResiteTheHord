@@ -18,8 +18,8 @@ TagManager:
   - Bullet
   - Enemy
   - Destroyable
-  - 
-  - 
+  - EnemySpawner
+  - PlayerSpawner
   - 
   - 
   - 

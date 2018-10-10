@@ -305,7 +305,7 @@ public class PlayerController : NetworkBehaviour {
         //Compensate position on server
         bullet.transform.position += ((Vector3)vel * ((float)delay / 1000f)); //Compensate position on server with no-collision
 
-        LayerMask layerMask = ~((1 << LayerMask.NameToLayer("Bullet")) | (1 << LayerMask.NameToLayer("Player")) | (1 << LayerMask.NameToLayer("Enemy")));
+        LayerMask layerMask = ~((1 << LayerMask.NameToLayer("Bullet")) | (1 << LayerMask.NameToLayer("Player")) | (1 << LayerMask.NameToLayer("Enemy") | (1 << LayerMask.NameToLayer("PlayerSpawner")) | (1 << LayerMask.NameToLayer("Destroyable"))));
 
         RaycastHit2D hit = Physics2D.Raycast(pos, bullet.transform.up, Vector2.Distance(pos, bullet.transform.position) + 0.2f, layerMask);
 
