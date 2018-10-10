@@ -41,12 +41,12 @@ public class PlayerHealth : Health {
 
     [ClientRpc]
     public override void RpcOnHealthChanged(int health) {
-        soundsController.Damage();
         currentHealth = health;
 
         healthBar.sizeDelta = new Vector2(health, healthBar.sizeDelta.y);
 
         if (isLocalPlayer) {
+            soundsController.Damage();
             cameraShaking.Shake(0.09f, 0.1f);
         }
     }
