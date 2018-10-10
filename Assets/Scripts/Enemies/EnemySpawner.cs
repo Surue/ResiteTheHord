@@ -5,13 +5,13 @@ using UnityEngine.Networking;
 
 public class EnemySpawner : NetworkBehaviour {
 
-    public GameObject enemyPrefab;
+    public List<GameObject> enemyPrefabs;
     public int numberOfEnemies;
     public int numberOfEnemiesToSpawn;
 
     GameObject mainGoalForEnemies;
 
-    static float TIME_BETWEEN_SPAWN = 0.5f;
+    static float TIME_BETWEEN_SPAWN = 0.75f;
     float timeSinceLastSpawn = 0;
 
     GameManager gameManager;
@@ -33,10 +33,6 @@ public class EnemySpawner : NetworkBehaviour {
     }
 
     void Update() {
-        if (Input.GetKeyDown(KeyCode.F)) {
-            Spawn();
-        }
-
         if (numberOfEnemiesToSpawn <= 0) {
             return;
         }
@@ -59,6 +55,8 @@ public class EnemySpawner : NetworkBehaviour {
     
     void Spawn() {
         Vector3 spawnPosition = transform.position;
+
+        GameObject enemyPrefab = enemyPrefabs[(int) (RandomSeed.GetValue() * enemyPrefabs.Count)];
 
         GameObject enemy = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);
 

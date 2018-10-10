@@ -16,6 +16,8 @@ public class EnemyAttackCQC : NetworkBehaviour {
     [SerializeField] float rotationSpeed = 10;
     [SerializeField] ParticleSystem attackParticleSystem;
 
+    EnemySound soundController;
+
     Animator animator;
     bool isAnimated = false;
 
@@ -34,6 +36,7 @@ public class EnemyAttackCQC : NetworkBehaviour {
 
     // Use this for initialization
     void Start () {
+        soundController = GetComponent<EnemySound>();
         movementController = GetComponent<EnemyMovement>();
         animator = GetComponentInChildren<Animator>();
     }
@@ -140,6 +143,7 @@ public class EnemyAttackCQC : NetworkBehaviour {
     IEnumerator AnimationAttack() {
         animator.SetTrigger("Attack");
         attackParticleSystem.Play();
+        soundController.Attack();
 
         while(transform.eulerAngles.z < 360f / 3f) {
             transform.rotation = Quaternion.Euler(0, 0, transform.eulerAngles.z + rotationSpeed);

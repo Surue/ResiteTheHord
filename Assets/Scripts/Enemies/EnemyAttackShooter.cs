@@ -11,6 +11,7 @@ public class EnemyAttackShooter : NetworkBehaviour {
     [SerializeField] bool canMultipleAttack = false;
     List<GameObject> attackTargets = new List<GameObject>();
     [SerializeField] GameObject bulletPrefab;
+    EnemySound soundController;
 
     static float TIME_CHECK_TARGET = 0.5f;
     float timerCheckTarget = 0f;
@@ -29,6 +30,7 @@ public class EnemyAttackShooter : NetworkBehaviour {
     State state = State.IDLE;
 
     void Start() {
+        soundController = GetComponent<EnemySound>();
         movementController = GetComponent<EnemyMovement>();
     }
 
@@ -120,8 +122,14 @@ public class EnemyAttackShooter : NetworkBehaviour {
         }
 
     }
+
+    [ClientRpc]
+    void RpcPlayAttackSound() {
+        soundController.Attack();
+    }
     
     void Fire(Vector3 direction) {
+        RpcPlayAttackSound();
         GameObject bullet = Instantiate(bulletPrefab);
         
         bullet.transform.position = transform.position + direction.normalized * 0.35f;

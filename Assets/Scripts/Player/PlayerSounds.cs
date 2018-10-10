@@ -22,7 +22,7 @@ public class PlayerSounds : MonoBehaviour {
     public void Fire() {
         foreach (AudioSource audioSource in fireAudioSource) {
             if (!audioSource.isPlaying) {
-                audioSource.clip = fireSounds[(int)(RandomSeed.GetValue() * spawnSounds.Count)];
+                audioSource.clip = fireSounds[(int)(RandomSeed.GetValue() * fireSounds.Count)];
                 audioSource.Play();
                 return;
             }
@@ -30,7 +30,7 @@ public class PlayerSounds : MonoBehaviour {
     }
 
     public void Damage() {
-        uniqueAudioSource.clip = damageSounds[(int)(RandomSeed.GetValue() * spawnSounds.Count)];
+        uniqueAudioSource.clip = damageSounds[(int)(RandomSeed.GetValue() * damageSounds.Count)];
         uniqueAudioSource.Play();
     }
 }
