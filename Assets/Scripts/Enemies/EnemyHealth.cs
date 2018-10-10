@@ -4,6 +4,14 @@ using UnityEngine;
 using UnityEngine.Networking;
 
 public class EnemyHealth : Health {
+    
+
+    void Start() {
+        GameObject instance = Instantiate(spawnParticleSystem, transform.position, Quaternion.identity).gameObject;
+
+        ParticleSystem.MainModule main = instance.GetComponent<ParticleSystem>().main;
+        main.startColor = Color.red;
+    }
 
     [ClientRpc]
     public override void RpcDestroy() {

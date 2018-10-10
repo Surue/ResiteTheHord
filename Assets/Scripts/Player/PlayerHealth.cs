@@ -9,9 +9,31 @@ public class PlayerHealth : Health {
 
     CameraShaking cameraShaking;
 
+
+
     // Use this for initialization
     void Start () {
         cameraShaking = FindObjectOfType<CameraShaking>();
+    }
+
+    [Server]
+    public override void TakeDamage(int damage, PlayerController bulletOwner = null) {
+        currentHealth -= damage;
+
+        if(currentHealth <= 0) {
+            if(destroyOnDeath) {
+                RpcDestroy();
+
+                Score score = GetComponent<Score>();
+                if(score != null && bulletOwner != null) {
+                    bulletOwner.CmdAddScore(score.transform.position, score.score);
+                }
+            } else {
+                FindObjectOfType<GameManager>().OnPlayerDeath(this.gameObject);
+            }
+        } else {
+            RpcOnHealthChanged(currentHealth);
+        }
     }
 
     [ClientRpc]
@@ -41,6 +63,11 @@ public class PlayerHealth : Health {
 
     [ClientRpc]
     public override void RpcRespawn(Vector3 pos) {
+        GameObject instance = Instantiate(spawnParticleSystem, pos, Quaternion.identity).gameObject;
+
+        ParticleSystem.MainModule main = instance.GetComponent<ParticleSystem>().main;
+        main.startColor = GetComponent<PlayerController>().GetColor();
+
         if(isLocalPlayer) {
             currentHealth = MAX_HEALTH;
 

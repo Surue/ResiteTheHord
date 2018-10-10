@@ -274,6 +274,8 @@ MonoBehaviour:
   destroyOnDeath: 0
   currentHealth: 1
   explosionParticleSystem: {fileID: 0}
+  spawnParticleSystem: {fileID: 198379939974238218, guid: 6b91cc2c98578d042afc925061b01671,
+    type: 2}
   healthBar: {fileID: 224740483824818220}
 --- !u!114 &114337323480026800
 MonoBehaviour:

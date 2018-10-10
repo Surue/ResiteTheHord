@@ -224,6 +224,8 @@ MonoBehaviour:
   currentHealth: 1
   explosionParticleSystem: {fileID: 198615512229359388, guid: 523491aea7bd4b147a8255b82e10fbda,
     type: 2}
+  spawnParticleSystem: {fileID: 198379939974238218, guid: 6b91cc2c98578d042afc925061b01671,
+    type: 2}
 --- !u!114 &114976118552824582
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -272,7 +274,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -989565151
-  m_SortingLayer: 2
+  m_SortingLayer: 3
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 3ae8c431b822fae4b9cb289afe7bf0d6, type: 3}
   m_Color: {r: 1, g: 0, b: 0, a: 1}
@@ -318,7 +320,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -989565151
-  m_SortingLayer: 2
+  m_SortingLayer: 3
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 59ad97ea5e3bc17478bbdeabaa1d8a1d, type: 3}
   m_Color: {r: 1, g: 0, b: 0, a: 0.39215687}

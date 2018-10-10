@@ -12,9 +12,10 @@ public class Health : NetworkBehaviour {
     public int currentHealth = MAX_HEALTH;
     
     [SerializeField] protected ParticleSystem explosionParticleSystem;
+    [SerializeField] protected ParticleSystem spawnParticleSystem;
 
     [Server]
-    public void TakeDamage(int damage, PlayerController bulletOwner = null) {
+    public virtual void TakeDamage(int damage, PlayerController bulletOwner = null) {
         currentHealth -= damage;
 
         if (currentHealth <= 0) {
@@ -26,7 +27,7 @@ public class Health : NetworkBehaviour {
                     bulletOwner.CmdAddScore(score.transform.position, score.score);
                 }
             } else {
-                FindObjectOfType<GameManager>().OnPlayerDeath(this.gameObject);
+                RpcRespawn(Vector3.zero);
             }
         } else {
             RpcOnHealthChanged(currentHealth);

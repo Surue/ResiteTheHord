@@ -23,6 +23,7 @@ GameObject:
   - component: {fileID: 114958990914249114}
   - component: {fileID: 114865022623352634}
   - component: {fileID: 114953609730546368}
+  - component: {fileID: 114857158665638572}
   m_Layer: 0
   m_Name: MapManager
   m_TagString: Untagged
@@ -56,6 +57,38 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   solidTilemap: {fileID: 0}
   groundTilemap: {fileID: 0}
+--- !u!114 &114857158665638572
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1647257244633646}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 372142912, guid: dc443db3e92b4983b9738c1131f555cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SceneId:
+    m_Value: 0
+  m_AssetId:
+    i0: 234
+    i1: 122
+    i2: 153
+    i3: 183
+    i4: 91
+    i5: 64
+    i6: 178
+    i7: 228
+    i8: 120
+    i9: 73
+    i10: 27
+    i11: 142
+    i12: 36
+    i13: 150
+    i14: 70
+    i15: 68
+  m_ServerOnly: 0
+  m_LocalPlayerAuthority: 0
 --- !u!114 &114865022623352634
 MonoBehaviour:
   m_ObjectHideFlags: 1
