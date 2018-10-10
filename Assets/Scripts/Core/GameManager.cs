@@ -115,6 +115,8 @@ public class GameManager : NetworkBehaviour {
                     circle.transform.position = mainGoalForEnnemies.transform.position;
                 }
 
+                GameObject.Find("PanelHider").SetActive(false);
+
                 state = State.WAIT_NEXT_WAVE;
                 break;
 
@@ -211,7 +213,6 @@ public class GameManager : NetworkBehaviour {
 
     [Command]
     public void CmdOnClientConnected(NetworkIdentity player) {
-        Debug.Log("New player");
         if (state == State.GENERATE_MAP) {
             players.Add(player.GetComponent<PlayerController>());
         } else {
