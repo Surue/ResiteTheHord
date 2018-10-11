@@ -16,7 +16,6 @@ public class MapController:MonoBehaviour {
 
     // Use this for initialization
     void Start() {
-        SetTiles();
     }
 
     public void SetTiles(MapTile[,] mapTiles) {
@@ -31,29 +30,9 @@ public class MapController:MonoBehaviour {
             }
         }
 
-        FindObjectOfType<NavigationAI>().GenerateNavigationGraph(tiles, new Vector2Int(5, 5));
+        FindObjectOfType<NavigationAI>().GenerateNavigationGraphFull(tiles, new Vector2Int(5, 5));
 
         DrawAll();
-    }
-
-    public void SetTiles() {
-        int width = solidTilemap.size.x;
-        int height = solidTilemap.size.y;
-
-        tiles = new MapTile[width, height];
-
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                Vector3Int pos = new Vector3Int(i + solidTilemap.cellBounds.xMin, j + solidTilemap.cellBounds.yMin, 0);
-                if (solidTilemap.HasTile(pos)) {
-                    tiles[i, j] = new MapTile(new Vector2Int(pos.x, pos.y), true);
-                }else {
-                    tiles[i, j] = new MapTile(new Vector2Int(pos.x, pos.y), false);
-                }
-            }
-        }
-
-        FindObjectOfType<NavigationAI>().GenerateNavigationGraph(tiles, new Vector2Int(Mathf.Abs(solidTilemap.cellBounds.x), Mathf.Abs(solidTilemap.cellBounds.y + 1)));
     }
 
     public void AttackTile(MapTile t, float damage) {
@@ -63,7 +42,7 @@ public class MapController:MonoBehaviour {
     }
 
     void UpdateTile(MapTile t) {
-        FindObjectOfType<NavigationAI>().GenerateNavigationGraph(tiles, new Vector2Int(Mathf.Abs(solidTilemap.cellBounds.x), Mathf.Abs(solidTilemap.cellBounds.y)));
+        FindObjectOfType<NavigationAI>().GenerateNavigationGraphFull(tiles, new Vector2Int(Mathf.Abs(solidTilemap.cellBounds.x), Mathf.Abs(solidTilemap.cellBounds.y)));
     }
 
     public void DrawAll() {
@@ -102,7 +81,7 @@ public class MapTile {
 
     public Vector2Int position;
 
-    public float cost = 1;
+    public int cost = 1;
 
     public TileBase solidTile;
     public TileBase groundTile;
@@ -121,7 +100,7 @@ public class MapTile {
 
         if(isSolid) {
             lifePoint = 1000;
-        }
+        } 
     }
 
     public void SetType(TileType t) {
@@ -141,7 +120,7 @@ public class MapTile {
             case TileType.INVULNERABLE:
                 isInvulnerable = true;
                 isSolid = true;
-                cost = Mathf.Infinity;
+                cost = 1000000;
                 break;
         }
     }

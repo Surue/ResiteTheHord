@@ -473,6 +473,16 @@ public class MapGenerator: NetworkBehaviour {
             }
         }
 
+        StartCoroutine(AddNetworkedCircuitEffect());
+
+        isGenerating = false;
+    }
+
+    IEnumerator AddNetworkedCircuitEffect() {
+        FindObjectOfType<NavigationAI>().GenerateNavigationGraphCross(roomQuadTree[0].roomTiles, new Vector2Int(exteriorWallSize/2, exteriorWallSize / 2));
+
+        yield return null;
+
         mapController.SetTiles(roomQuadTree[0].roomTiles);
 
         isGenerating = false;

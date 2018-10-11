@@ -257,12 +257,11 @@ public class EnemyMovement : NetworkBehaviour {
             return;
         }
 
-        NetworkConnection conn = CustomNetworkManager.singleton.client.connection;
-
         byte e;
         int delay;
 
         if(!isServer) {
+            NetworkConnection conn = CustomNetworkManager.singleton.client.connection;
             delay = NetworkTransport.GetRemoteDelayTimeMS(conn.hostId, conn.connectionId, time, out e) + frameToWait * (int)(Time.fixedDeltaTime * 1000);
         } else {
             delay = frameToWait * (int)(Time.fixedDeltaTime * 1000);

@@ -34,9 +34,9 @@ public class PathFinding:MonoBehaviour {
 
     public List<Vector2> GetPathFromTo(Vector2 from, Vector2 target, bool canDig = false) {
         Vector2Int startTile = MapController.Vector2TilePos(from);
-        NavigationAI.Node start = navigationGraph.graph[startTile.x, startTile.y];
+        NavigationAI.Node start = navigationGraph.graphFull[startTile.x, startTile.y];
         Vector2Int endTile = MapController.Vector2TilePos(target);
-        NavigationAI.Node end = navigationGraph.graph[endTile.x, endTile.y];
+        NavigationAI.Node end = navigationGraph.graphFull[endTile.x, endTile.y];
 
         //Get A* sorted list
         Astar(start, end, canDig);
@@ -53,8 +53,8 @@ public class PathFinding:MonoBehaviour {
     }
 
     public List<Vector2Int> GetPathFromTo(Vector2Int from, Vector2Int target, bool canDig = false) {
-        NavigationAI.Node start = navigationGraph.graph[from.x, from.y];
-        NavigationAI.Node end = navigationGraph.graph[target.x, target.y];
+        NavigationAI.Node start = navigationGraph.graphFull[from.x, from.y];
+        NavigationAI.Node end = navigationGraph.graphFull[target.x, target.y];
 
         //Get A* sorted list
         Astar(start, end, canDig);
@@ -113,7 +113,7 @@ public class PathFinding:MonoBehaviour {
     void Astar(NavigationAI.Node start, NavigationAI.Node end, bool canDig = false) {
 
         if(canDig) {
-            foreach(NavigationAI.Node node in navigationGraph.graph) {
+            foreach(NavigationAI.Node node in navigationGraph.graphFull) {
                 node.Reset();
                 node.SetCost(Vector2.Distance(node.position, end.position));
             }

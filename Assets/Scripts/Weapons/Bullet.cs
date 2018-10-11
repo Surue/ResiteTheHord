@@ -110,9 +110,8 @@ public class Bullet : NetworkBehaviour {
         byte e;
         int delay;
 
-        NetworkConnection conn = CustomNetworkManager.singleton.client.connection;
-
         if(!isServer) {
+            NetworkConnection conn = CustomNetworkManager.singleton.client.connection;
             delay = NetworkTransport.GetRemoteDelayTimeMS(conn.hostId, conn.connectionId, time, out e);
         } else {
             delay = 0;

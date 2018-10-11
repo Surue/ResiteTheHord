@@ -4,11 +4,13 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 
 using System.Linq;
+using TMPro;
 
 public class NavigationAI:MonoBehaviour {
 
     public class Node {
-        public static float COST_NODE_SOLID = 1000;
+        public const int COST_NODE_SOLID = 1000;
+        public const int COST_NODE_WALLED = 10;
 
         public Vector2 position;
         public Vector2Int positionInt;
@@ -16,7 +18,7 @@ public class NavigationAI:MonoBehaviour {
         public List<Node> neighbors = null;
 
         //A* variables
-        public float tileCost;
+        public int tileCost;
         public float cost;
         public float totalCost;
         public Node parent = null;
@@ -43,19 +45,22 @@ public class NavigationAI:MonoBehaviour {
         }
     }
 
-    public bool DebugMode = true;
+    [Header("Debug")]
+    public bool DebugModeFullNodes = true;
+    public bool DebugModeCrossNodes = true;
 
     public bool isGenerated = false;
 
     public bool canGoThroughSolid = false;
 
-    public Node[,] graph;
+    public Node[,] graphFull;
+    public Node[,] graphCross;
 
     float cellSize = 1;
 
     Vector2Int offsetTileMap = Vector2Int.zero;
 
-    public void GenerateNavigationGraph(MapTile[,] mapTiles, Vector2Int offset) {
+    public void GenerateNavigationGraphCross(MapTile[,] mapTiles, Vector2Int offset) {
         offsetTileMap = offset;
         isGenerated = false;
 
@@ -64,10 +69,10 @@ public class NavigationAI:MonoBehaviour {
         int height = mapTiles.GetLength(1);
 
         //If graph does not existe -> instanciate it
-        graph = new Node[width, height];
+        graphCross = new Node[width, height];
         for(int x = 0;x < width;x++) {
             for(int y = 0;y < height;y++) {
-                graph[x, y] = null;
+                graphCross[x, y] = null;
             }
         }
 
@@ -75,15 +80,16 @@ public class NavigationAI:MonoBehaviour {
         for(int x = 0;x < width;x++) {
             for(int y = 0;y < height;y++) {
 
-                if(!mapTiles[x, y].isSolid && !mapTiles[x, y].isOccuped) {
-                    graph[x, y] = new Node {
+                if(mapTiles[x, y].isSolid && !mapTiles[x, y].isOccuped) {
+                    graphCross[x, y] = new Node {
                         tileCost = Node.COST_NODE_SOLID,
                         neighbors = new List<Node>(),
                         position = new Vector2(mapTiles[x, y].position.x + cellSize / 2.0f, mapTiles[x, y].position.y + cellSize / 2.0f),
-                        positionInt = new Vector2Int(mapTiles[x, y].position.x, mapTiles[x, y].position.y)
+                        positionInt = new Vector2Int(mapTiles[x, y].position.x, mapTiles[x, y].position.y),
+                        isSolid = true
                     };
                 } else if(mapTiles[x, y].isOccuped) {
-                    graph[x, y] = new Node {
+                    graphCross[x, y] = new Node {
                         tileCost = Node.COST_NODE_SOLID,
                         neighbors = new List<Node>(),
                         position = new Vector2(mapTiles[x, y].position.x + cellSize / 2.0f, mapTiles[x, y].position.y + cellSize / 2.0f),
@@ -91,12 +97,100 @@ public class NavigationAI:MonoBehaviour {
                         isSolid = true
                     };
                 } else {
-                    graph[x, y] = new Node {
+                    graphCross[x, y] = new Node {
                         tileCost = mapTiles[x, y].cost,
                         neighbors = new List<Node>(),
                         position = new Vector2(mapTiles[x, y].position.x + cellSize / 2.0f, mapTiles[x, y].position.y + cellSize / 2.0f),
                         positionInt = new Vector2Int(mapTiles[x, y].position.x, mapTiles[x, y].position.y),
+                        isSolid = false
+                    };
+                }
+            }
+        }
+
+        BoundsInt bounds = new BoundsInt(-1, -1, 0, 3, 3, 1);
+
+        for(int x = 0;x < width;x++) {
+            for(int y = 0;y < height;y++) {
+                if (!graphCross[x, y].isSolid) {
+                    foreach(Vector3Int b in bounds.allPositionsWithin) {
+                        if(b.x == 0 && b.y == 0) continue; //Not self node
+                        if(x + b.x < 0 || x + b.x >= width || y + b.y < 0 || y + b.y >= height) continue; //Inside bounderies
+
+                        if(graphCross[x + b.x, y + b.y].isSolid && !canGoThroughSolid) continue;
+                        
+                        if(b.x == 0 || b.y == 0) { //On ajoute uniquement la croix
+                            graphCross[x, y].neighbors.Add(graphCross[x + b.x, y + b.y]);
+                        }
+
+                    }
+                }
+            }
+        }
+
+        //Add cost if against wall
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                if (!mapTiles[x, y].isSolid) {
+
+                    foreach(Vector3Int b in bounds.allPositionsWithin) {
+                        if(b.x == 0 && b.y == 0) continue;
+                        if(x + b.x < 0 || x + b.x >= width || y + b.y < 0 || y + b.y >= height) continue;
+
+                        if(graphCross[x + b.x, y + b.y].isSolid) {
+                            graphCross[x, y].tileCost = Node.COST_NODE_WALLED;
+                        }
+                    }
+                }
+            }
+        }
+
+        isGenerated = true;
+    }
+
+    public void GenerateNavigationGraphFull(MapTile[,] mapTiles, Vector2Int offset) {
+        offsetTileMap = offset;
+        isGenerated = false;
+
+        //Get width and height of tilemap
+        int width = mapTiles.GetLength(0);
+        int height = mapTiles.GetLength(1);
+
+        //If graph does not existe -> instanciate it
+        graphFull = new Node[width, height];
+        for(int x = 0;x < width;x++) {
+            for(int y = 0;y < height;y++) {
+                graphFull[x, y] = null;
+            }
+        }
+
+        //Go through tilemap to find free tile
+        for(int x = 0;x < width;x++) {
+            for(int y = 0;y < height;y++) {
+
+                if(mapTiles[x, y].isSolid && !mapTiles[x, y].isOccuped) {
+                    graphFull[x, y] = new Node {
+                        tileCost = Node.COST_NODE_SOLID,
+                        neighbors = new List<Node>(),
+                        position = new Vector2(mapTiles[x, y].position.x + cellSize / 2.0f, mapTiles[x, y].position.y + cellSize / 2.0f),
+                        positionInt = new Vector2Int(mapTiles[x, y].position.x, mapTiles[x, y].position.y),
                         isSolid = true
+                    };
+                } else if(mapTiles[x, y].isOccuped) {
+                    graphFull[x, y] = new Node {
+                        tileCost = Node.COST_NODE_SOLID,
+                        neighbors = new List<Node>(),
+                        position = new Vector2(mapTiles[x, y].position.x + cellSize / 2.0f, mapTiles[x, y].position.y + cellSize / 2.0f),
+                        positionInt = new Vector2Int(mapTiles[x, y].position.x, mapTiles[x, y].position.y),
+                        isSolid = true
+                    };
+                } else {
+                    graphFull[x, y] = new Node {
+                        tileCost = mapTiles[x, y].cost,
+                        neighbors = new List<Node>(),
+                        position = new Vector2(mapTiles[x, y].position.x + cellSize / 2.0f, mapTiles[x, y].position.y + cellSize / 2.0f),
+                        positionInt = new Vector2Int(mapTiles[x, y].position.x, mapTiles[x, y].position.y),
+                        isSolid = false
                     };
                 }
             }
@@ -107,22 +201,39 @@ public class NavigationAI:MonoBehaviour {
         for(int x = 0;x < width;x++) {
             for(int y = 0;y < height;y++) {
                 if((mapTiles[x, y].isSolid || mapTiles[x, y].isOccuped) && !canGoThroughSolid) continue;
-                if(graph[x, y] != null) {
+                if(graphFull[x, y] != null) {
 
                     foreach(Vector3Int b in bounds.allPositionsWithin) {
                         if(b.x == 0 && b.y == 0) continue;
                         if(x + b.x < 0 || x + b.x >= width || y + b.y < 0 || y + b.y >= height) continue;
                         if((mapTiles[x + b.x, y + b.y].isSolid || mapTiles[x + b.x, y + b.y].isOccuped) && !canGoThroughSolid) continue;
 
-                        if(graph[x + b.x, y + b.y] != null) {
+                        if(graphFull[x + b.x, y + b.y] != null) {
                             if(b.x == 0 || b.y == 0) { //On ajoute automatiquement la croix
-                                graph[x, y].neighbors.Add(graph[x + b.x, y + b.y]);
+                                graphFull[x, y].neighbors.Add(graphFull[x + b.x, y + b.y]);
                             } else { //Si on est en diagonale
                                      //Entre bloc solid il est impossible de voyager de manière diagonale
-                                if(graph[x + b.x, y].isSolid || graph[x, y + b.y].isSolid) continue;
+                                if(graphFull[x + b.x, y].isSolid || graphFull[x, y + b.y].isSolid) continue;
 
-                                graph[x, y].neighbors.Add(graph[x + b.x, y + b.y]);
+                                graphFull[x, y].neighbors.Add(graphFull[x + b.x, y + b.y]);
                             }
+                        }
+                    }
+                }
+            }
+        }
+
+        //Add cost if against wall
+        for(int x = 0;x < width;x++) {
+            for(int y = 0;y < height;y++) {
+                if(!mapTiles[x, y].isSolid) {
+
+                    foreach(Vector3Int b in bounds.allPositionsWithin) {
+                        if(b.x == 0 && b.y == 0) continue;
+                        if(x + b.x < 0 || x + b.x >= width || y + b.y < 0 || y + b.y >= height) continue;
+
+                        if(graphFull[x + b.x, y + b.y].isSolid) {
+                            graphFull[x, y].tileCost = Node.COST_NODE_WALLED;
                         }
                     }
                 }
@@ -135,7 +246,7 @@ public class NavigationAI:MonoBehaviour {
     public List<Node> GetGraphOnlyFreeTile() {
         List<Node> freeNode = new List<Node>();
 
-        foreach(Node node in graph) {
+        foreach(Node node in graphFull) {
             if(!node.isSolid)
                 freeNode.Add(node);
         }
@@ -146,9 +257,9 @@ public class NavigationAI:MonoBehaviour {
     public Node GetRandomPatrolsPoint() {
 
         while(true) {
-            int width = graph.GetLength(0);
-            int height = graph.GetLength(1);
-            Node n = graph[Random.Range(0, width), Random.Range(0, height)];
+            int width = graphFull.GetLength(0);
+            int height = graphFull.GetLength(1);
+            Node n = graphFull[Random.Range(0, width), Random.Range(0, height)];
 
             if(!n.isSolid) return n;
         }
@@ -159,16 +270,16 @@ public class NavigationAI:MonoBehaviour {
         int x = (int)pos.x + offsetTileMap.x;
         int y = (int)pos.y + offsetTileMap.y;
 
-        Node n = graph[x, y];
+        Node n = graphFull[x, y];
 
         if(!n.isSolid) return n;
 
         BoundsInt bounds = new BoundsInt(-1, -1, 0, 3, 3, 1);
 
         foreach(Vector3Int b in bounds.allPositionsWithin) {
-            if(pos.x + b.x >= 0 && pos.x + b.x < graph.GetLength(0) && pos.y + b.y >= 0 && pos.y + b.y < graph.GetLength(1)) {
-                if(!graph[x + b.x, y + b.y].isSolid) {
-                    n = graph[x + b.x, y + b.y];
+            if(pos.x + b.x >= 0 && pos.x + b.x < graphFull.GetLength(0) && pos.y + b.y >= 0 && pos.y + b.y < graphFull.GetLength(1)) {
+                if(!graphFull[x + b.x, y + b.y].isSolid) {
+                    n = graphFull[x + b.x, y + b.y];
                 }
             }
         }
@@ -177,16 +288,92 @@ public class NavigationAI:MonoBehaviour {
     }
 
     private void OnDrawGizmos() {
-        if(DebugMode) {
-            if(graph != null) {
-                foreach(Node node in graph) {
+        if (DebugModeFullNodes) {
+            if (graphFull != null) {
+                foreach (Node node in graphFull) {
                     if(node != null) {
-                        Gizmos.color = node.tileCost == Node.COST_NODE_SOLID ? Color.white : Color.red;
+                        switch((int)node.tileCost) {
+                            case 1:
+                                Gizmos.color = Color.white;
+                                break;
+
+                            case Node.COST_NODE_WALLED:
+                                Gizmos.color = Color.grey;
+                                break;
+
+                            case Node.COST_NODE_SOLID:
+                                Gizmos.color = Color.red;
+                                break;
+                        }
 
                         Gizmos.DrawWireSphere(new Vector3(node.position.x, node.position.y, 0), 0.1f);
 
                         foreach(Node neighbor in node.neighbors) {
-                            Gizmos.DrawLine(node.position, neighbor.position);
+                            switch((int)neighbor.tileCost) {
+                                case 1:
+                                    Gizmos.color = Color.white;
+                                    if(node.tileCost == 1) {
+                                        Gizmos.DrawLine(node.position, neighbor.position);
+                                    }
+
+                                    break;
+
+                                case Node.COST_NODE_WALLED:
+                                    Gizmos.color = Color.grey;
+                                    Gizmos.DrawLine(node.position, neighbor.position);
+                                    break;
+
+                                case Node.COST_NODE_SOLID:
+                                    Gizmos.color = Color.red;
+                                    Gizmos.DrawLine(node.position, neighbor.position);
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if(DebugModeCrossNodes) { 
+            if(graphCross != null) {
+                foreach(Node node in graphCross) {
+                    if(node != null) {
+                        switch ((int)node.tileCost) {
+                            case 1:
+                                Gizmos.color = Color.white;
+                                break;
+
+                            case Node.COST_NODE_WALLED:
+                                Gizmos.color = Color.grey;
+                                break;
+
+                            case Node.COST_NODE_SOLID:
+                                Gizmos.color = Color.red;
+                                break;
+                        }
+
+                        Gizmos.DrawWireSphere(new Vector3(node.position.x, node.position.y, 0), 0.1f);
+
+                        foreach(Node neighbor in node.neighbors) {
+                            switch ((int) neighbor.tileCost) {
+                                case 1:
+                                    Gizmos.color = Color.white;
+                                    if (node.tileCost == 1) {
+                                        Gizmos.DrawLine(node.position, neighbor.position);
+                                    }
+
+                                    break;
+
+                                case Node.COST_NODE_WALLED:
+                                    Gizmos.color = Color.grey;
+                                    Gizmos.DrawLine(node.position, neighbor.position);
+                                    break;
+
+                                case Node.COST_NODE_SOLID:
+                                    Gizmos.color = Color.red;
+                                    Gizmos.DrawLine(node.position, neighbor.position);
+                                    break;
+                            }
                         }
                     }
                 }
