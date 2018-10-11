@@ -254,14 +254,24 @@ public class NavigationAI:MonoBehaviour {
         return freeNode;
     }
 
-    public Node GetRandomPatrolsPoint() {
-
+    public Node GetRandomPoint() {
+        int width = graphFull.GetLength(0);
+        int height = graphFull.GetLength(1);
         while(true) {
-            int width = graphFull.GetLength(0);
-            int height = graphFull.GetLength(1);
-            Node n = graphFull[Random.Range(0, width), Random.Range(0, height)];
+            Node n = graphFull[(int)(RandomSeed.GetValue() * width), (int)(RandomSeed.GetValue() * height)];
 
             if(!n.isSolid) return n;
+        }
+    }
+
+    public Node GetRandomCrossNode() {
+        int width = graphCross.GetLength(0);
+        int height = graphCross.GetLength(1);
+
+        while(true) {
+            Node n = graphCross[(int)(RandomSeed.GetValue() * width), (int)(RandomSeed.GetValue() * height)];
+            
+            if(n.tileCost != 1000) return n;
         }
     }
 
@@ -278,8 +288,30 @@ public class NavigationAI:MonoBehaviour {
 
         foreach(Vector3Int b in bounds.allPositionsWithin) {
             if(pos.x + b.x >= 0 && pos.x + b.x < graphFull.GetLength(0) && pos.y + b.y >= 0 && pos.y + b.y < graphFull.GetLength(1)) {
-                if(!graphFull[x + b.x, y + b.y].isSolid) {
+                if(graphFull[x + b.x, y + b.y].tileCost != 1000) {
                     n = graphFull[x + b.x, y + b.y];
+                }
+            }
+        }
+
+        return n;
+    }
+
+    public Node GetClosestCrossNode(Vector2 pos) {
+
+        int x = (int)pos.x + offsetTileMap.x;
+        int y = (int)pos.y + offsetTileMap.y;
+
+        Node n = graphCross[x, y];
+
+        if(!n.isSolid) return n;
+
+        BoundsInt bounds = new BoundsInt(-1, -1, 0, 3, 3, 1);
+
+        foreach(Vector3Int b in bounds.allPositionsWithin) {
+            if(pos.x + b.x >= 0 && pos.x + b.x < graphCross.GetLength(0) && pos.y + b.y >= 0 && pos.y + b.y < graphCross.GetLength(1)) {
+                if(!graphCross[x + b.x, y + b.y].isSolid) {
+                    n = graphCross[x + b.x, y + b.y];
                 }
             }
         }

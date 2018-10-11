@@ -32,64 +32,43 @@ public class PathFinding:MonoBehaviour {
         return path;
     }
 
-    public List<Vector2> GetPathFromTo(Vector2 from, Vector2 target, bool canDig = false) {
-        Vector2Int startTile = MapController.Vector2TilePos(from);
-        NavigationAI.Node start = navigationGraph.graphFull[startTile.x, startTile.y];
-        Vector2Int endTile = MapController.Vector2TilePos(target);
-        NavigationAI.Node end = navigationGraph.graphFull[endTile.x, endTile.y];
+    public List<NavigationAI.Node> GetNodesFromTo(NavigationAI.Node start, NavigationAI.Node target) {
+        Astar(start, target);
 
-        //Get A* sorted list
-        Astar(start, end, canDig);
-
-        List<Vector2> path = new List<Vector2> {
-            end.position
+        List<NavigationAI.Node> path = new List<NavigationAI.Node> {
+            target
         };
 
-        BuildShortestPath(path, end);
+        BuildShortestPath(path, target);
 
         path.Reverse();
 
         return path;
     }
 
-    public List<Vector2Int> GetPathFromTo(Vector2Int from, Vector2Int target, bool canDig = false) {
-        NavigationAI.Node start = navigationGraph.graphFull[from.x, from.y];
-        NavigationAI.Node end = navigationGraph.graphFull[target.x, target.y];
 
+    public List<Vector2Int> GetPathFromTo(NavigationAI.Node start, NavigationAI.Node target) {
         //Get A* sorted list
-        Astar(start, end, canDig);
+        Astar(start, target);
 
         List<Vector2Int> path = new List<Vector2Int> {
-            end.positionInt
+            target.positionInt
         };
 
-        BuildShortestPath(path, end);
+        BuildShortestPath(path, target);
 
         path.Reverse();
 
         return path;
     }
 
-    public List<Vector2> GetPathFromTo(Transform from, NavigationAI.Node target, bool canDig = false) {
-        NavigationAI.Node start = navigationGraph.GetClosestNode(from.position);
-        NavigationAI.Node end = target;
-
-        //Get A* sorted list
-        Astar(start, end, canDig);
-
-        List<Vector2> path = new List<Vector2>();
-        path.Add(end.position);
-
-        BuildShortestPath(path, end);
-
-        path.Reverse();
-
-        //No path founded
-        if(path.Count == 1) {
-            path = null;
+    void BuildShortestPath(List<NavigationAI.Node> path, NavigationAI.Node node) {
+        if(node.parent == null) {
+            return;
         }
 
-        return path;
+        path.Add(node);
+        BuildShortestPath(path, node.parent);
     }
 
     void BuildShortestPath(List<Vector2Int> path, NavigationAI.Node node) {
@@ -111,7 +90,6 @@ public class PathFinding:MonoBehaviour {
     }
 
     void Astar(NavigationAI.Node start, NavigationAI.Node end, bool canDig = false) {
-
         if(canDig) {
             foreach(NavigationAI.Node node in navigationGraph.graphFull) {
                 node.Reset();
@@ -119,6 +97,16 @@ public class PathFinding:MonoBehaviour {
             }
         } else {
             foreach(NavigationAI.Node node in navigationGraph.GetGraphOnlyFreeTile()) {
+                node.Reset();
+                node.SetCost(Vector2.Distance(node.position, end.position));
+            }
+
+            foreach(NavigationAI.Node node in navigationGraph.graphFull) {
+                node.Reset();
+                node.SetCost(Vector2.Distance(node.position, end.position));
+            }
+
+            foreach(NavigationAI.Node node in navigationGraph.graphCross) {
                 node.Reset();
                 node.SetCost(Vector2.Distance(node.position, end.position));
             }

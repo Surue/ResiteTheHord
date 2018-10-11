@@ -119,11 +119,13 @@ MonoBehaviour:
   maxWallSize: 3
   corridorsSize: 3
   exteriorWallSize: 5
+  maxIteration: 10
   solidTile: {fileID: 11400000, guid: c1be24426fa215b489b4821e29cbd5f5, type: 2}
   groundTile: {fileID: 11400000, guid: 797ec1cda21cadc429a661a6fcf32299, type: 2}
   motherChipTile: {fileID: 11400000, guid: 0dffe7c2fdfa54e418a82b6f48cf379a, type: 2}
   enemySpawnerTile: {fileID: 11400000, guid: bfb7ff1890aeba34b9e227c827688ec3, type: 2}
   playerSpawnerTile: {fileID: 11400000, guid: d8ab25df27e8f8a49ac0ccca2265edf6, type: 2}
+  networkCircuitTile: {fileID: 11400000, guid: 8676e8555caf56343aa86368827a9741, type: 2}
   mainCore: {fileID: 1575710031253794, guid: 7f1bcee32fe138f44b77b5a8232ca11e, type: 2}
   enemySpawner: {fileID: 1707513042892566, guid: 18854c242bc94f4458767c920470d797,
     type: 2}
@@ -145,6 +147,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b774e266bd544042bc6cdf3214badca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DebugMode: 0
+  DebugModeFullNodes: 1
+  DebugModeCrossNodes: 0
   isGenerated: 0
   canGoThroughSolid: 0

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Analytics;
 using UnityEngine.Networking;
 
 public class MapGenerator: NetworkBehaviour {
@@ -38,12 +39,16 @@ public class MapGenerator: NetworkBehaviour {
     [Header("Exterior wall rules")]
     [SerializeField] int exteriorWallSize = 10;
 
+    [Header("Network effect rules")]
+    [SerializeField] int maxIteration = 10;
+
     [Header("Tiles")]
     [SerializeField] RuleTile solidTile;
     [SerializeField] RuleTile groundTile;
     [SerializeField] RuleTile motherChipTile;
     [SerializeField] RuleTile enemySpawnerTile;
     [SerializeField] RuleTile playerSpawnerTile;
+    [SerializeField] RuleTile networkCircuitTile;
 
     [Header("Gameobject to spawn")]
     [SerializeField] GameObject mainCore;
@@ -374,9 +379,13 @@ public class MapGenerator: NetworkBehaviour {
             int x = mainRoom.roomTiles.GetLength(0) / 2 - mainRoom.roomTiles.GetLength(0) % 2;
             int y = mainRoom.roomTiles.GetLength(1) / 2 - mainRoom.roomTiles.GetLength(1) % 2;
             mainRoom.roomTiles[x, y].groundTile = motherChipTile;
+            mainRoom.roomTiles[x, y].isOccuped = true;
             mainRoom.roomTiles[x + 1, y].groundTile = motherChipTile;
+            mainRoom.roomTiles[x + 1, y].isOccuped = true;
             mainRoom.roomTiles[x, y + 1].groundTile = motherChipTile;
+            mainRoom.roomTiles[x, y + 1].isOccuped = true;
             mainRoom.roomTiles[x + 1, y + 1].groundTile = motherChipTile;
+            mainRoom.roomTiles[x + 1, y + 1].isOccuped = true;
         }
 
         for (int i = 0; i < roomQuadTree[0].roomTiles.GetLength(0); i++) {
@@ -428,6 +437,7 @@ public class MapGenerator: NetworkBehaviour {
             if (neighborsAllFree) {
                 foreach(Vector3Int b in bounds.allPositionsWithin) {
                     mainRoom.roomTiles[posTile.x + b.x, posTile.y + b.y].groundTile = playerSpawnerTile;
+                    mainRoom.roomTiles[posTile.x + b.x, posTile.y + b.y].isOccuped = true;
                 }
 
                 playerSpawnerNb++;
@@ -443,9 +453,13 @@ public class MapGenerator: NetworkBehaviour {
                 int y = room.roomTiles.GetLength(1) / 2 - room.roomTiles.GetLength(1) % 2;
 
                 room.roomTiles[x, y].groundTile = enemySpawnerTile;
+                room.roomTiles[x, y].isOccuped = true;
                 room.roomTiles[x + 1, y].groundTile = enemySpawnerTile;
+                room.roomTiles[x + 1, y].isOccuped = true;
                 room.roomTiles[x, y + 1].groundTile = enemySpawnerTile;
+                room.roomTiles[x, y + 1].isOccuped = true;
                 room.roomTiles[x + 1, y + 1].groundTile = enemySpawnerTile;
+                room.roomTiles[x + 1, y + 1].isOccuped = true;
             }
         }
 
@@ -479,8 +493,32 @@ public class MapGenerator: NetworkBehaviour {
     }
 
     IEnumerator AddNetworkedCircuitEffect() {
-        FindObjectOfType<NavigationAI>().GenerateNavigationGraphCross(roomQuadTree[0].roomTiles, new Vector2Int(exteriorWallSize/2, exteriorWallSize / 2));
+        NavigationAI navGraph = FindObjectOfType<NavigationAI>();
+        navGraph.GenerateNavigationGraphCross(roomQuadTree[0].roomTiles, new Vector2Int(exteriorWallSize/2, exteriorWallSize / 2));
+        navGraph.GenerateNavigationGraphFull(roomQuadTree[0].roomTiles, new Vector2Int(exteriorWallSize/2, exteriorWallSize / 2));
 
+        PathFinding aStar = FindObjectOfType<PathFinding>();
+        NavigationAI.Node startNode = null;
+        for (int i = 0; i < roomQuadTree[0].roomTiles.GetLength(0); i++) {
+            for (int j = 0; j < roomQuadTree[0].roomTiles.GetLength(1); j++) {
+                if (roomQuadTree[0].roomTiles[i, j].groundTile == motherChipTile) {
+                    startNode = navGraph.GetClosestCrossNode(
+                        new Vector2(i + exteriorWallSize / 2, j + exteriorWallSize / 2)
+                        );
+                }
+            }
+        }
+
+        for (int i = 0; i < maxIteration; i++) {
+            NavigationAI.Node finalNode = navGraph.GetRandomCrossNode();
+
+            List<NavigationAI.Node> nodes = aStar.GetNodesFromTo(startNode, finalNode);
+
+            foreach (NavigationAI.Node n in nodes) {
+                roomQuadTree[0].roomTiles[n.positionInt.x, n.positionInt.y].groundTile = networkCircuitTile;
+                roomQuadTree[0].roomTiles[n.positionInt.x, n.positionInt.y].cost = -10;
+            }
+        }
         yield return null;
 
         mapController.SetTiles(roomQuadTree[0].roomTiles);
